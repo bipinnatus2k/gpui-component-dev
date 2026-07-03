@@ -17,6 +17,7 @@ doctest = false
 [features]
 decimal = ["dep:rust_decimal"]
 inspector = ["gpui_macros/inspector", "gpui/inspector"]
+time = ["dep:chrono"]
 
 # For syntax highlighting in Markdown and CodeEditor.
 tree-sitter-languages = [
@@ -135,7 +136,7 @@ html5ever = "0.27"
 markup5ever_rcdom = "0.3.0"
 
 # Calendar
-chrono = "0.4.38"
+chrono = { version = "0.4.38", optional = true }
 
 # Code Editor
 aho-corasick = "1.1.3"

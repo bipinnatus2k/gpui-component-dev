@@ -2,12 +2,11 @@ use gpui::{
     App, AppContext, Context, Entity, FocusHandle, Focusable, InteractiveElement as _, IntoElement,
     ParentElement, Render, SharedString, Styled, Window, div, px,
 };
-
+use gpui::prelude::FluentBuilder;
 use gpui_component::{
     ActiveTheme, Icon, IconName, WindowExt as _,
     button::{Button, ButtonVariants as _},
     checkbox::Checkbox,
-    date_picker::{DatePicker, DatePickerState},
     dialog::{
         Dialog, DialogAction, DialogClose, DialogDescription, DialogFooter, DialogHeader,
         DialogTitle,
@@ -19,6 +18,8 @@ use gpui_component::{
     text::{TextView, markdown},
     v_flex,
 };
+#[cfg(feature = "time")]
+use gpui_component::date_picker::{DatePicker, DatePickerState};
 
 use crate::{TestAction, section};
 
@@ -27,6 +28,7 @@ pub struct DialogStory {
     selected_value: Option<SharedString>,
     input1: Entity<InputState>,
     input2: Entity<InputState>,
+    #[cfg(feature = "time")]
     date: Entity<DatePickerState>,
     select: Entity<SelectState<Vec<String>>>,
     table: Entity<TableState<MyTable>>,
@@ -107,6 +109,7 @@ impl DialogStory {
         let input2 = cx.new(|cx| {
             InputState::new(window, cx).placeholder("For test focus back on dialog close.")
         });
+        #[cfg(feature = "time")]
         let date = cx.new(|cx| DatePickerState::new(window, cx));
         let select = cx.new(|cx| {
             SelectState::new(
@@ -124,6 +127,7 @@ impl DialogStory {
             selected_value: None,
             input1,
             input2,
+            #[cfg(feature = "time")]
             date,
             select,
             dialog_overlay: true,
@@ -147,6 +151,7 @@ impl DialogStory {
         let dialog_overlay = self.dialog_overlay;
         let overlay_closable = self.overlay_closable;
         let input1 = self.input1.clone();
+        #[cfg(feature = "time")]
         let date = self.date.clone();
         let select = self.select.clone();
         let view = cx.entity();
@@ -161,9 +166,12 @@ impl DialogStory {
                 .on_ok({
                     let view = view.clone();
                     let input1 = input1.clone();
+                    #[cfg(feature = "time")]
                     let date = date.clone();
+
                     move |_, window, cx| {
                         view.update(cx, |view, cx| {
+                            #[cfg(feature = "time")]
                             view.selected_value = Some(
                                 format!(
                                     "Hello, {}, date: {}",
@@ -171,7 +179,15 @@ impl DialogStory {
                                     date.read(cx).date()
                                 )
                                 .into(),
-                            )
+                            );
+                            #[!cfg(feature = "time")]
+                            view.selected_value = Some(
+                                format!(
+                                    "Hello, {}",
+                                    input1.read(cx).value(),
+                                )
+                                    .into(),
+                            );
                         });
                         window.push_notification("You have pressed confirm.", cx);
                         true
@@ -191,6 +207,7 @@ impl DialogStory {
                                     )),
                             )
                             .child(
+                                #[cfg(feature = "time")]
                                 v_flex()
                                     .px_4()
                                     .pb_4()
@@ -202,6 +219,17 @@ impl DialogStory {
                                     .child(Input::new(&input1))
                                     .child(Select::new(&select))
                                     .child(DatePicker::new(&date).placeholder("Date of Birth")),
+                                #[!cfg(feature = "time")]
+                                v_flex()
+                                    .px_4()
+                                    .pb_4()
+                                    .gap_3()
+                                    .child(
+                                        "This is a dialog dialog, \
+                                        you can put anything here.",
+                                    )
+                                    .child(Input::new(&input1))
+                                    .child(Select::new(&select))
                             )
                             .child(
                                 DialogFooter::new()

@@ -7,7 +7,6 @@ use gpui_component::{
     button::{Button, ButtonGroup},
     checkbox::Checkbox,
     color_picker::{ColorPicker, ColorPickerState},
-    date_picker::{DatePicker, DatePickerState},
     form::{field, v_form},
     h_flex,
     input::{Input, InputState},
@@ -16,6 +15,8 @@ use gpui_component::{
     switch::Switch,
     v_flex,
 };
+#[cfg(feature = "time")]
+use gpui_component::date_picker::{DatePicker, DatePickerState};
 
 pub struct FormStory {
     focus_handle: FocusHandle,
@@ -25,6 +26,7 @@ pub struct FormStory {
     bio_input: Entity<InputState>,
     color_state: Entity<ColorPickerState>,
     subscribe_email: bool,
+    #[cfg(feature = "time")]
     date: Entity<DatePickerState>,
     layout: Axis,
     size: Size,
@@ -80,6 +82,8 @@ impl FormStory {
                 .placeholder("Enter text here...")
                 .default_value("Hello 世界，this is GPUI component.")
         });
+
+        #[cfg(feature = "time")]
         let date = cx.new(|cx| DatePickerState::new(window, cx));
 
         Self {
@@ -88,6 +92,7 @@ impl FormStory {
             name_input,
             email_input,
             bio_input,
+            #[cfg(feature = "time")]
             date,
             color_state,
             subscribe_email: false,
@@ -232,10 +237,13 @@ impl Render for FormStory {
                             .child("This is a full width form field."),
                     )
                     .child(
+                        #[cfg(feature = "time")]
                         field()
                             .label("Please select your birthday")
                             .description("Select your birthday, we will send you a gift.")
                             .child(DatePicker::new(&self.date)),
+                        #[!cfg(feature = "time")]
+                        div()
                     )
                     .child(
                         field()

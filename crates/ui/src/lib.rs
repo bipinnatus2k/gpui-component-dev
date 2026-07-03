@@ -13,6 +13,7 @@ mod index_path;
 mod inspector;
 mod root;
 mod styled;
+#[cfg(feature = "time")]
 mod time;
 mod title_bar;
 mod virtual_list;
@@ -93,6 +94,7 @@ pub use inspector::*;
 pub use root::Root;
 pub use styled::*;
 pub use theme::*;
+#[cfg(feature = "time")]
 pub use time::{calendar, date_picker};
 pub use title_bar::*;
 pub use virtual_list::{VirtualList, VirtualListScrollHandle, h_virtual_list, v_virtual_list};
@@ -112,6 +114,7 @@ pub fn init(cx: &mut App) {
     root::init(cx);
     focus_trap::init(cx);
     color_picker::init(cx);
+    #[cfg(feature = "time")]
     date_picker::init(cx);
     dock::init(cx);
     sheet::init(cx);

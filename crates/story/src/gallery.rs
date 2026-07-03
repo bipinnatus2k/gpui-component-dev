@@ -48,6 +48,7 @@ impl Gallery {
                     StoryContainer::panel::<BadgeStory>(window, cx),
                     StoryContainer::panel::<BreadcrumbStory>(window, cx),
                     StoryContainer::panel::<ButtonStory>(window, cx),
+                    #[cfg(feature = "time")]
                     StoryContainer::panel::<CalendarStory>(window, cx),
                     StoryContainer::panel::<ChartStory>(window, cx),
                     StoryContainer::panel::<CheckboxStory>(window, cx),
@@ -55,11 +56,14 @@ impl Gallery {
                     StoryContainer::panel::<CollapsibleStory>(window, cx),
                     StoryContainer::panel::<ColorPickerStory>(window, cx),
                     StoryContainer::panel::<ComboboxStory>(window, cx),
+                    #[cfg(feature = "time")]
                     StoryContainer::panel::<DatePickerStory>(window, cx),
                     StoryContainer::panel::<DescriptionListStory>(window, cx),
+                    #[cfg(feature = "time")]
                     StoryContainer::panel::<DialogStory>(window, cx),
                     StoryContainer::panel::<DropdownButtonStory>(window, cx),
                     StoryContainer::panel::<EditorStory>(window, cx),
+                    #[cfg(feature = "time")]
                     StoryContainer::panel::<FormStory>(window, cx),
                     StoryContainer::panel::<GroupBoxStory>(window, cx),
                     StoryContainer::panel::<HoverCardStory>(window, cx),
@@ -84,6 +88,7 @@ impl Gallery {
                     StoryContainer::panel::<SelectStory>(window, cx),
                     StoryContainer::panel::<SeparatorStory>(window, cx),
                     StoryContainer::panel::<SettingsStory>(window, cx),
+                    #[cfg(feature = "time")]
                     StoryContainer::panel::<SheetStory>(window, cx),
                     StoryContainer::panel::<SidebarStory>(window, cx),
                     StoryContainer::panel::<SkeletonStory>(window, cx),
