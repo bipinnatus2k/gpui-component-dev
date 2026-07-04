@@ -3,10 +3,16 @@ mod completion_menu;
 mod diagnostic_popover;
 mod hover_popover;
 
+#[cfg(feature = "code-editor")]
 pub(crate) use code_action_menu::*;
+#[cfg(feature = "code-editor")]
 pub(crate) use completion_menu::*;
+#[cfg(feature = "code-editor")]
 pub(crate) use diagnostic_popover::*;
+#[cfg(feature = "code-editor")]
 pub(crate) use hover_popover::*;
+
+
 
 use gpui::{
     App, Div, ElementId, Entity, InteractiveElement as _, IntoElement, SharedString, Stateful,
@@ -18,11 +24,15 @@ use crate::{
     text::{TextView, TextViewStyle},
 };
 
+
+#[cfg(feature = "code-editor")]
 pub(crate) enum ContextMenu {
     Completion(Entity<CompletionMenu>),
     CodeAction(Entity<CodeActionMenu>),
 }
 
+
+#[cfg(feature = "code-editor")]
 impl ContextMenu {
     pub(crate) fn is_open(&self, cx: &App) -> bool {
         match self {
@@ -64,6 +74,8 @@ pub(super) fn render_markdown(
         .selectable(true)
 }
 
+
+#[cfg(feature = "code-editor")]
 pub(super) fn editor_popover(id: impl Into<ElementId>, cx: &App) -> Stateful<Div> {
     div()
         .id(id)

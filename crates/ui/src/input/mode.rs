@@ -1,19 +1,39 @@
+#[cfg(feature = "code-editor")]
 use std::rc::Rc;
+#[cfg(feature = "code-editor")]
 use std::time::Duration;
-use std::{cell::RefCell, ops::Range};
+#[cfg(feature = "code-editor")]
+use std::cell::RefCell;
+use std::ops::Range;
 
-use gpui::{App, SharedString, Task};
+#[cfg(feature = "code-editor")]
+use gpui::Task;
+use gpui::{App, SharedString};
 use ropey::Rope;
 
 use super::display_map::DisplayMap;
 use crate::highlighter::DiagnosticSet;
+#[cfg(feature = "code-editor")]
 use crate::highlighter::SyntaxHighlighter;
-use crate::input::{InputEdit, RopeExt as _, TabSize};
+#[cfg(feature = "code-editor")]
+use crate::input::{InputEdit, RopeExt as _};
+use crate::input::TabSize;
 
+#[cfg(feature = "code-editor")]
 #[allow(dead_code)]
 pub(super) struct PendingBackgroundParse {
     pub highlighter: Rc<RefCell<Option<SyntaxHighlighter>>>,
     pub parse_task: Rc<RefCell<Option<Task<()>>>>,
+    pub language: SharedString,
+    pub text: Rope,
+    pub is_folding: bool,
+}
+
+#[cfg(not(feature = "code-editor"))]
+#[allow(dead_code)]
+pub(super) struct PendingBackgroundParse {
+    pub highlighter: (),
+    pub parse_task: (),
     pub language: SharedString,
     pub text: Rope,
     pub is_folding: bool,
@@ -34,6 +54,7 @@ pub(crate) enum InputMode {
         max_rows: usize,
     },
     /// A code editor input mode.
+    #[cfg(feature = "code-editor")]
     CodeEditor {
         multi_line: bool,
         tab: TabSize,
@@ -67,6 +88,7 @@ impl InputMode {
     }
 
     /// Create a code editor input mode with default settings.
+    #[cfg(feature = "code-editor")]
     pub(super) fn code_editor(language: impl Into<SharedString>) -> Self {
         InputMode::CodeEditor {
             rows: 2,
@@ -94,6 +116,7 @@ impl InputMode {
     pub(super) fn multi_line(mut self, multi_line: bool) -> Self {
         match &mut self {
             InputMode::PlainText { multi_line: ml, .. } => *ml = multi_line,
+            #[cfg(feature = "code-editor")]
             InputMode::CodeEditor { multi_line: ml, .. } => *ml = multi_line,
             InputMode::AutoGrow { .. } => {}
         }
@@ -107,24 +130,38 @@ impl InputMode {
 
     #[inline]
     pub(super) fn is_code_editor(&self) -> bool {
-        matches!(self, InputMode::CodeEditor { .. })
+        #[cfg(feature = "code-editor")]
+        {
+            matches!(self, InputMode::CodeEditor { .. })
+        }
+        #[cfg(not(feature = "code-editor"))]
+        {
+            false
+        }
     }
 
     /// Return true if the mode is code editor and `folding: true`, `multi_line: true`.
     #[inline]
     pub(crate) fn is_folding(&self) -> bool {
-        if cfg!(target_family = "wasm") {
-            return false;
-        }
-
-        matches!(
-            self,
-            InputMode::CodeEditor {
-                folding: true,
-                multi_line: true,
-                ..
+        #[cfg(feature = "code-editor")]
+        {
+            if cfg!(target_family = "wasm") {
+                return false;
             }
-        )
+
+            matches!(
+                self,
+                InputMode::CodeEditor {
+                    folding: true,
+                    multi_line: true,
+                    ..
+                }
+            )
+        }
+        #[cfg(not(feature = "code-editor"))]
+        {
+            false
+        }
     }
 
     #[inline]
@@ -136,6 +173,7 @@ impl InputMode {
     pub(super) fn is_multi_line(&self) -> bool {
         match self {
             InputMode::PlainText { multi_line, .. } => *multi_line,
+            #[cfg(feature = "code-editor")]
             InputMode::CodeEditor { multi_line, .. } => *multi_line,
             InputMode::AutoGrow { max_rows, .. } => *max_rows > 1,
         }
@@ -146,6 +184,7 @@ impl InputMode {
             InputMode::PlainText { rows, .. } => {
                 *rows = new_rows;
             }
+            #[cfg(feature = "code-editor")]
             InputMode::CodeEditor { rows, .. } => {
                 *rows = new_rows;
             }
@@ -176,6 +215,7 @@ impl InputMode {
 
         match self {
             InputMode::PlainText { rows, .. } => *rows,
+            #[cfg(feature = "code-editor")]
             InputMode::CodeEditor { rows, .. } => *rows,
             InputMode::AutoGrow { rows, .. } => *rows,
         }
@@ -207,13 +247,20 @@ impl InputMode {
     /// Return false if the mode is not [`InputMode::CodeEditor`].
     #[inline]
     pub(super) fn line_number(&self) -> bool {
-        match self {
-            InputMode::CodeEditor {
-                line_number,
-                multi_line,
-                ..
-            } => *line_number && *multi_line,
-            _ => false,
+        #[cfg(feature = "code-editor")]
+        {
+            match self {
+                InputMode::CodeEditor {
+                    line_number,
+                    multi_line,
+                    ..
+                } => *line_number && *multi_line,
+                _ => false,
+            }
+        }
+        #[cfg(not(feature = "code-editor"))]
+        {
+            false
         }
     }
 
@@ -222,6 +269,7 @@ impl InputMode {
     /// Returns `Some(PendingBackgroundParse)` when the synchronous parse
     /// timed out and the caller should dispatch a background parse.
     /// Returns `None` when parsing completed (or no highlighter is active).
+    #[cfg(feature = "code-editor")]
     pub(super) fn update_highlighter(
         &mut self,
         selected_range: &Range<usize>,
@@ -278,6 +326,20 @@ impl InputMode {
         }
     }
 
+    #[cfg(not(feature = "code-editor"))]
+    pub(super) fn update_highlighter(
+        &mut self,
+        _selected_range: &Range<usize>,
+        _old_text: &Rope,
+        _new_text: &Rope,
+        _change_text: &str,
+        _force: bool,
+        _cx: &mut App,
+    ) -> Option<PendingBackgroundParse> {
+        None
+    }
+
+    #[cfg(feature = "code-editor")]
     #[allow(unused)]
     pub(super) fn diagnostics(&self) -> Option<&DiagnosticSet> {
         match self {
@@ -286,6 +348,8 @@ impl InputMode {
         }
     }
 
+    #[cfg(feature = "code-editor")]
+    #[cfg(feature = "code-editor")]
     pub(super) fn diagnostics_mut(&mut self) -> Option<&mut DiagnosticSet> {
         match self {
             InputMode::CodeEditor { diagnostics, .. } => Some(diagnostics),
@@ -293,12 +357,38 @@ impl InputMode {
         }
     }
 
+    #[cfg(not(feature = "code-editor"))]
+    pub(super) fn diagnostics_mut(&mut self) -> Option<&mut DiagnosticSet> {
+        None
+    }
+
     /// Get a reference to the highlighter (if available)
+    #[cfg(feature = "code-editor")]
     pub(super) fn highlighter(&self) -> Option<&Rc<RefCell<Option<SyntaxHighlighter>>>> {
         match self {
             InputMode::CodeEditor { highlighter, .. } => Some(highlighter),
             _ => None,
         }
+    }
+
+    #[cfg(not(feature = "code-editor"))]
+    pub(super) fn highlighter(&self) -> Option<&()> {
+        None
+    }
+
+    #[cfg(not(feature = "code-editor"))]
+    pub(super) fn code_editor(_language: impl Into<SharedString>) -> Self {
+        InputMode::PlainText {
+            multi_line: true,
+            tab: TabSize::default(),
+            rows: 2,
+        }
+    }
+
+    #[cfg(not(feature = "code-editor"))]
+    #[allow(unused)]
+    pub(super) fn diagnostics(&self) -> Option<&DiagnosticSet> {
+        None
     }
 }
 
@@ -306,6 +396,7 @@ impl InputMode {
 ///
 /// Byte offsets and positions for `start`/`old_end` come from `old_text`;
 /// `new_end` byte/position come from the post-edit `text`.
+#[cfg(feature = "code-editor")]
 fn replacement_input_edit(
     old_text: &Rope,
     new_text: &Rope,
@@ -332,11 +423,12 @@ mod tests {
 
     use super::replacement_input_edit;
     use crate::{
-        highlighter::DiagnosticSet,
         input::{Point, TabSize, mode::InputMode},
+        highlighter::DiagnosticSet,
     };
 
     #[test]
+    #[cfg(feature = "code-editor")]
     fn test_replacement_input_edit_backspace_at_end_uses_old_range() {
         let old_text = Rope::from_str("-=");
         let text = Rope::from_str("-");
@@ -351,6 +443,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "code-editor")]
     #[cfg(not(target_family = "wasm"))]
     fn test_replacement_input_edit_shifts_tree_sitter_included_ranges() {
         let old_source = "[1,2]";
@@ -386,6 +479,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "code-editor")]
     fn test_code_editor() {
         let mode = InputMode::code_editor("rust");
         assert_eq!(mode.is_code_editor(), true);

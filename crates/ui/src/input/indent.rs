@@ -57,14 +57,15 @@ impl InputMode {
     #[inline]
     pub(super) fn is_indentable(&self) -> bool {
         match self {
-            InputMode::PlainText { multi_line, .. } | InputMode::CodeEditor { multi_line, .. } => {
-                *multi_line
-            }
+            InputMode::PlainText { multi_line, .. } => *multi_line,
+            #[cfg(feature = "code-editor")]
+            InputMode::CodeEditor { multi_line, .. } => *multi_line,
             _ => false,
         }
     }
 
     #[inline]
+    #[cfg(feature = "code-editor")]
     pub(super) fn has_indent_guides(&self) -> bool {
         match self {
             InputMode::CodeEditor {
@@ -77,9 +78,16 @@ impl InputMode {
     }
 
     #[inline]
+    #[cfg(not(feature = "code-editor"))]
+    pub(super) fn has_indent_guides(&self) -> bool {
+        false
+    }
+
+    #[inline]
     pub(super) fn tab_size(&self) -> TabSize {
         match self {
             InputMode::PlainText { tab, .. } => *tab,
+            #[cfg(feature = "code-editor")]
             InputMode::CodeEditor { tab, .. } => *tab,
             _ => TabSize::default(),
         }
@@ -173,6 +181,7 @@ impl InputState {
     /// Set whether to show indent guides in code editor mode, default is true.
     ///
     /// Only for [`InputMode::CodeEditor`] mode.
+    #[cfg(feature = "code-editor")]
     pub fn indent_guides(mut self, indent_guides: bool) -> Self {
         debug_assert!(self.mode.is_code_editor() && self.mode.is_multi_line());
         if let InputMode::CodeEditor {
@@ -187,6 +196,7 @@ impl InputState {
     /// Set indent guides in code editor mode.
     ///
     /// Only for [`InputMode::CodeEditor`] mode.
+    #[cfg(feature = "code-editor")]
     pub fn set_indent_guides(
         &mut self,
         indent_guides: bool,
@@ -210,6 +220,7 @@ impl InputState {
         debug_assert!(self.mode.is_multi_line() || self.mode.is_code_editor());
         match &mut self.mode {
             InputMode::PlainText { tab: t, .. } => *t = tab,
+            #[cfg(feature = "code-editor")]
             InputMode::CodeEditor { tab: t, .. } => *t = tab,
             _ => {}
         }

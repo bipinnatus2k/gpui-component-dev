@@ -9,7 +9,7 @@ mod geometry;
 pub mod global_state;
 mod icon;
 mod index_path;
-#[cfg(any(feature = "inspector", debug_assertions))]
+#[cfg(all(any(feature = "inspector", debug_assertions), feature = "code-editor"))]
 mod inspector;
 mod root;
 mod styled;
@@ -38,6 +38,8 @@ pub mod combobox;
 pub mod description_list;
 pub mod dialog;
 pub mod dock;
+#[cfg(feature = "code-editor")]
+pub mod editor;
 pub mod form;
 pub mod group_box;
 pub mod highlighter;
@@ -89,7 +91,7 @@ pub use gpui_component_macros::icon_named;
 pub use icon::*;
 pub use index_path::IndexPath;
 pub use input::{Rope, RopeExt, RopeLines};
-#[cfg(any(feature = "inspector", debug_assertions))]
+#[cfg(all(any(feature = "inspector", debug_assertions), feature = "code-editor"))]
 pub use inspector::*;
 pub use root::Root;
 pub use styled::*;
@@ -109,7 +111,7 @@ rust_i18n::i18n!("locales", fallback = "en");
 pub fn init(cx: &mut App) {
     theme::init(cx);
     global_state::init(cx);
-    #[cfg(any(feature = "inspector", debug_assertions))]
+    #[cfg(all(any(feature = "inspector", debug_assertions), feature = "code-editor"))]
     inspector::init(cx);
     root::init(cx);
     focus_trap::init(cx);

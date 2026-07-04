@@ -15,9 +15,15 @@ edition.workspace = true
 doctest = false
 
 [features]
+default = ["code-editor"]
 decimal = ["dep:rust_decimal"]
-inspector = ["gpui_macros/inspector", "gpui/inspector"]
+inspector = ["gpui_macros/inspector", "gpui/inspector", "code-editor"]
 time = ["dep:chrono"]
+
+# Code editor functionality: syntax highlighting, LSP integration,
+# code folding, line numbers, and other advanced editing features.
+# Disable this if you only need basic text inputs.
+code-editor = ["dep:lsp-types"]
 
 # For syntax highlighting in Markdown and CodeEditor.
 tree-sitter-languages = [
@@ -140,7 +146,7 @@ chrono = { version = "0.4.38", optional = true }
 
 # Code Editor
 aho-corasick = "1.1.3"
-lsp-types.workspace = true
+lsp-types = { workspace = true, optional = true }
 
 # Cross-platform time APIs (zero-cost on native, uses web APIs on WASM)
 instant = { version = "0.1", features = ["wasm-bindgen"] }

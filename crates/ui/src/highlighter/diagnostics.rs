@@ -13,10 +13,21 @@ use crate::{
     ActiveTheme,
 };
 
+#[cfg(feature = "code-editor")]
 pub type DiagnosticRelatedInformation = lsp_types::DiagnosticRelatedInformation;
+#[cfg(feature = "code-editor")]
 pub type CodeDescription = lsp_types::CodeDescription;
+#[cfg(feature = "code-editor")]
 pub type RelatedInformation = lsp_types::DiagnosticRelatedInformation;
+#[cfg(feature = "code-editor")]
 pub type DiagnosticTag = lsp_types::DiagnosticTag;
+
+#[cfg(not(feature = "code-editor"))]
+pub type DiagnosticRelatedInformation = ();
+#[cfg(not(feature = "code-editor"))]
+pub type CodeDescription = ();
+#[cfg(not(feature = "code-editor"))]
+pub type DiagnosticTag = ();
 
 #[derive(Debug, Eq, PartialEq, Clone, Default)]
 pub struct Diagnostic {
@@ -55,6 +66,7 @@ pub struct Diagnostic {
     pub data: Option<serde_json::Value>,
 }
 
+#[cfg(feature = "code-editor")]
 impl From<lsp_types::Diagnostic> for Diagnostic {
     fn from(value: lsp_types::Diagnostic) -> Self {
         Self {
@@ -86,6 +98,7 @@ pub enum DiagnosticSeverity {
     Info,
 }
 
+#[cfg(feature = "code-editor")]
 impl From<lsp_types::DiagnosticSeverity> for DiagnosticSeverity {
     fn from(value: lsp_types::DiagnosticSeverity) -> Self {
         match value {

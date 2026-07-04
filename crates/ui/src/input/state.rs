@@ -34,15 +34,14 @@ use super::{
 use crate::Size;
 use crate::actions::{SelectDown, SelectLeft, SelectRight, SelectUp};
 use crate::highlighter::DiagnosticSet;
-#[cfg(not(target_family = "wasm"))]
 use crate::highlighter::LanguageRegistry;
 use crate::input::blink_cursor::CURSOR_WIDTH;
 use crate::input::movement::MoveDirection;
 use crate::input::{
-    HoverDefinition, InlineCompletion, Lsp, Position, RopeExt as _, Selection,
+    Lsp, HoverDefinition, InlineCompletion, ContextMenu, DiagnosticPopover, HoverPopover,
+    Position, RopeExt as _, Selection,
     display_map::LineLayout,
     element::RIGHT_MARGIN,
-    popovers::{ContextMenu, DiagnosticPopover, HoverPopover},
     search::SearchPanel,
 };
 use crate::native_menu::NativeMenu;
@@ -624,6 +623,7 @@ impl InputState {
     /// Set enable/disable code folding, only for [`InputMode::CodeEditor`] mode.
     ///
     /// Default: true
+    #[cfg(feature = "code-editor")]
     pub fn folding(mut self, folding: bool) -> Self {
         debug_assert!(self.mode.is_code_editor());
         if let InputMode::CodeEditor { folding: f, .. } = &mut self.mode {
@@ -632,9 +632,16 @@ impl InputState {
         self
     }
 
+    /// Set enable/disable code folding, only for plain text mode (no-op).
+    #[cfg(not(feature = "code-editor"))]
+    pub fn folding(self, _folding: bool) -> Self {
+        self
+    }
+
     /// Set code folding at runtime, only for [`InputMode::CodeEditor`] mode.
     ///
     /// When disabling, all existing folds are cleared.
+    #[cfg(feature = "code-editor")]
     pub fn set_folding(&mut self, folding: bool, _: &mut Window, cx: &mut Context<Self>) {
         debug_assert!(self.mode.is_code_editor());
         if let InputMode::CodeEditor { folding: f, .. } = &mut self.mode {
@@ -646,7 +653,11 @@ impl InputState {
         cx.notify();
     }
 
+    #[cfg(not(feature = "code-editor"))]
+    pub fn set_folding(&mut self, _folding: bool, _: &mut Window, _cx: &mut Context<Self>) {}
+
     /// Set enable/disable line number, only for [`InputMode::CodeEditor`] mode.
+    #[cfg(feature = "code-editor")]
     pub fn line_number(mut self, line_number: bool) -> Self {
         debug_assert!(self.mode.is_code_editor() && self.mode.is_multi_line());
         if let InputMode::CodeEditor { line_number: l, .. } = &mut self.mode {
@@ -655,7 +666,13 @@ impl InputState {
         self
     }
 
+    #[cfg(not(feature = "code-editor"))]
+    pub fn line_number(self, _line_number: bool) -> Self {
+        self
+    }
+
     /// Set line number, only for [`InputMode::CodeEditor`] mode.
+    #[cfg(feature = "code-editor")]
     pub fn set_line_number(&mut self, line_number: bool, _: &mut Window, cx: &mut Context<Self>) {
         debug_assert!(self.mode.is_code_editor() && self.mode.is_multi_line());
         if let InputMode::CodeEditor { line_number: l, .. } = &mut self.mode {
@@ -664,6 +681,9 @@ impl InputState {
         cx.notify();
     }
 
+    #[cfg(not(feature = "code-editor"))]
+    pub fn set_line_number(&mut self, _line_number: bool, _: &mut Window, _cx: &mut Context<Self>) {}
+
     /// Set the number of rows for the multi-line Textarea.
     ///
     /// This is only used when `multi_line` is set to true.
@@ -671,7 +691,11 @@ impl InputState {
     /// default: 2
     pub fn rows(mut self, rows: usize) -> Self {
         match &mut self.mode {
-            InputMode::PlainText { rows: r, .. } | InputMode::CodeEditor { rows: r, .. } => {
+            InputMode::PlainText { rows: r, .. } => {
+                *r = rows
+            }
+            #[cfg(feature = "code-editor")]
+            InputMode::CodeEditor { rows: r, .. } => {
                 *r = rows
             }
             InputMode::AutoGrow {
@@ -687,6 +711,7 @@ impl InputState {
     }
 
     /// Set highlighter language for for [`InputMode::CodeEditor`] mode.
+    #[cfg(feature = "code-editor")]
     pub fn set_highlighter(
         &mut self,
         new_language: impl Into<SharedString>,
@@ -708,6 +733,14 @@ impl InputState {
         cx.notify();
     }
 
+    #[cfg(not(feature = "code-editor"))]
+    pub fn set_highlighter(
+        &mut self,
+        _new_language: impl Into<SharedString>,
+        _cx: &mut Context<Self>,
+    ) {}
+
+    #[cfg(feature = "code-editor")]
     fn reset_highlighter(&mut self, cx: &mut Context<Self>) {
         match &mut self.mode {
             InputMode::CodeEditor {
@@ -722,6 +755,9 @@ impl InputState {
         }
         cx.notify();
     }
+
+    #[cfg(not(feature = "code-editor"))]
+    fn reset_highlighter(&mut self, _cx: &mut Context<Self>) {}
 
     #[inline]
     pub fn diagnostics(&self) -> Option<&DiagnosticSet> {
@@ -1827,6 +1863,8 @@ impl InputState {
         self.handle_mouse_move(offset, event, window, cx);
 
         if self.mode.is_code_editor() {
+            #[cfg(feature = "code-editor")]
+            {
             if let Some(diagnostic) = self
                 .mode
                 .diagnostics()
@@ -1851,6 +1889,7 @@ impl InputState {
                     })
                 }
             }
+            } // #[cfg(feature = "code-editor")]
         }
     }
 
@@ -2598,6 +2637,7 @@ impl InputState {
 
     /// Update fold candidates from tree-sitter syntax tree (full extraction).
     /// Used only on initial load or language changes.
+    #[cfg(feature = "code-editor")]
     fn update_fold_candidates(&mut self) {
         if !self.mode.is_folding() {
             return;
@@ -2622,6 +2662,7 @@ impl InputState {
 
     /// Incrementally update fold candidates after a text edit.
     /// Only traverses the edited region of the syntax tree instead of the full tree.
+    #[cfg(feature = "code-editor")]
     fn update_fold_candidates_incremental(&mut self, edit_range: &Range<usize>, new_text: &str) {
         if !self.mode.is_folding() {
             return;
@@ -2651,9 +2692,9 @@ impl InputState {
 
     /// Spawn a background parse after the synchronous parse timed out.
     ///
-    /// Dropping the returned `Task` (stored in `parse_task`) cancels the
+    /// Droping the returned `Task` (stored in `parse_task`) cancels the
     /// parse, which naturally debounces rapid edits.
-    #[cfg(not(target_family = "wasm"))]
+    #[cfg(all(not(target_family = "wasm"), feature = "code-editor"))]
     fn dispatch_background_parse(
         pending: super::mode::PendingBackgroundParse,
         window: &mut Window,
@@ -2752,6 +2793,40 @@ impl InputState {
     ) {
         // No-op
     }
+}
+
+/// No-op stubs for editor-specific methods when `code-editor` is disabled.
+#[cfg(not(feature = "code-editor"))]
+impl InputState {
+    pub(crate) fn on_action_toggle_code_actions(&mut self, _action: &ToggleCodeActions, _window: &mut Window, _cx: &mut Context<Self>) {}
+    pub(crate) fn on_action_go_to_definition(&mut self, _action: &GoToDefinition, _window: &mut Window, _cx: &mut Context<Self>) {}
+    #[allow(unused)]
+    pub(crate) fn accept_inline_completion(&mut self, _window: &mut Window, _cx: &mut Context<Self>) -> bool { false }
+    pub(crate) fn hide_context_menu(&mut self, _cx: &mut Context<Self>) {}
+    pub(crate) fn clear_inline_completion(&mut self, _cx: &mut Context<Self>) {}
+    pub fn handle_action_for_context_menu(&mut self, _action: Box<dyn gpui::Action>, _window: &mut Window, _cx: &mut Context<Self>) -> bool { false }
+    pub(crate) fn has_inline_completion(&self) -> bool { false }
+    pub(crate) fn handle_hover_definition(&mut self, _offset: usize, _window: &mut Window, _cx: &mut Context<Self>) {}
+    pub(crate) fn handle_click_hover_definition(&mut self, _event: &gpui::MouseDownEvent, _offset: usize, _window: &mut Window, _cx: &mut Context<Self>) -> bool { false }
+    pub(crate) fn clear_hover_state(&mut self, _cx: &mut Context<Self>) {}
+    pub(super) fn handle_mouse_move(&mut self, _offset: usize, _event: &gpui::MouseMoveEvent, _window: &mut Window, _cx: &mut Context<Self>) {}
+    pub(crate) fn is_context_menu_open(&self, _cx: &gpui::App) -> bool { false }
+    pub(crate) fn handle_completion_trigger(&mut self, _range: &Range<usize>, _new_text: &str, _window: &mut Window, _cx: &mut Context<Self>) {}
+
+    fn dispatch_background_parse(
+        _pending: super::mode::PendingBackgroundParse,
+        _window: &mut Window,
+        _cx: &mut Context<Self>,
+    ) {}
+
+    fn update_fold_candidates(&mut self) {}
+    fn update_fold_candidates_incremental(&mut self, _edit_range: &Range<usize>, _new_text: &str) {}
+}
+
+#[cfg(not(feature = "code-editor"))]
+impl crate::input::element::TextElement {
+    pub(super) fn layout_hover_definition(&self, _cx: &gpui::App) -> Option<gpui::HighlightStyle> { None }
+    pub(super) fn layout_hover_definition_hitbox(&self, _state: &InputState, _window: &mut Window, _cx: &App) -> Option<gpui::Hitbox> { None }
 }
 
 impl EntityInputHandler for InputState {
@@ -3138,6 +3213,7 @@ mod tests {
     }
 
     #[gpui::test]
+    #[cfg(feature = "code-editor")]
     fn test_highlighting_preserved_after_fold(cx: &mut TestAppContext) {
         use crate::highlighter::HighlightTheme;
         use crate::input::display_map::FoldRange;

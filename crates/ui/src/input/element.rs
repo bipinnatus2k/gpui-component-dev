@@ -1320,6 +1320,8 @@ impl TextElement {
     }
 
     /// First usize is the offset of skipped.
+    #[allow(unreachable_code, unused_variables, unused_mut)]
+    #[cfg(feature = "code-editor")]
     fn highlight_lines(
         &mut self,
         visible_buffer_lines: &[usize],
@@ -1332,6 +1334,7 @@ impl TextElement {
         let is_multi_line = state.mode.is_multi_line();
 
         let (mut highlighter, diagnostics) = match &state.mode {
+            #[cfg(feature = "code-editor")]
             InputMode::CodeEditor {
                 highlighter,
                 diagnostics,
@@ -1339,6 +1342,10 @@ impl TextElement {
             } => (highlighter.borrow_mut(), diagnostics),
             _ => return None,
         };
+        #[cfg(not(feature = "code-editor"))]
+        return None;
+        #[cfg(feature = "code-editor")]
+        {
         let highlighter = highlighter.as_mut()?;
 
         let mut styles = Vec::with_capacity(visible_buffer_lines.len());
@@ -1419,6 +1426,7 @@ impl TextElement {
         styles = gpui::combine_highlights(diagnostic_styles, styles).collect();
 
         Some(styles)
+        } // #[cfg(feature = "code-editor")]
     }
 }
 
@@ -1618,12 +1626,17 @@ impl Element for TextElement {
             .text
             .line_end_offset(visible_range.end.saturating_sub(1));
 
-        let highlight_styles = self.highlight_lines(
-            &visible_buffer_lines,
-            visible_top,
-            visible_start_offset..visible_end_offset,
-            cx,
-        );
+        let highlight_styles: Option<Vec<(Range<usize>, HighlightStyle)>> = {
+            #[cfg(feature = "code-editor")]
+            { self.highlight_lines(
+                &visible_buffer_lines,
+                visible_top,
+                visible_start_offset..visible_end_offset,
+                cx,
+            ) }
+            #[cfg(not(feature = "code-editor"))]
+            { None }
+        };
 
         let state = self.state.read(cx);
 
