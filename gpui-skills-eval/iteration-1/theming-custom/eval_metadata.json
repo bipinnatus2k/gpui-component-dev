@@ -1,0 +1,11 @@
+{"eval_id": 6, "eval_name": "theming-custom", "prompt": "Add a custom 'Midnight Purple' dark theme to the story gallery...", "assertions": [
+  "Creates or modifies a theme file with ThemeConfig JSON",
+  "Uses serde_json::json! macro to build config",
+  "Sets primary to #7C3AED or similar purple",
+  "Sets background to #0F0A1E or similar dark",
+  "Sets foreground to #EDE9FE or similar light",
+  "Sets radius to 8",
+  "Uses Theme::global_mut(cx).apply_config() pattern",
+  "Uses std::rc::Rc for the config",
+  "Dark mode is specified"
+]}

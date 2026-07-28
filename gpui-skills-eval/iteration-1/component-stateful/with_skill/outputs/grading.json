@@ -1,0 +1,13 @@
+{
+  "expectations": [
+    {"text": "Creates or modifies crates/ui/src/rating.rs", "passed": true, "evidence": "rating.rs file created with full component implementation (241 lines)"},
+    {"text": "Defines a RatingState struct that is created via cx.new()", "passed": true, "evidence": "RatingState struct defined at rating.rs:21; story uses cx.new(|_| RatingState::new(5, 3)) at rating_story.rs:40"},
+    {"text": "RatingState implements EventEmitter<RatingEvent>", "passed": true, "evidence": "impl EventEmitter<RatingEvent> for RatingState {} at rating.rs:27"},
+    {"text": "Rating element takes Entity<RatingState> via new()", "passed": true, "evidence": "pub fn new(state: &Entity<RatingState>) -> Self at rating.rs:91"},
+    {"text": "Implements Sizable trait for Rating", "passed": true, "evidence": "impl Sizable for Rating with with_size method at rating.rs:149-154"},
+    {"text": "Handles click interaction to set rating value", "passed": true, "evidence": "on_click handler calls state.set_value(new, cx) at rating.rs:215-227"},
+    {"text": "Handles hover interaction for preview", "passed": true, "evidence": "on_mouse_move calls state.set_hovered_value(ix, cx) at rating.rs:209-213; on_hover calls state.reset_hover(cx) at rating.rs:183-186"},
+    {"text": "Has init() function registered in lib.rs init()", "passed": true, "evidence": "pub mod rating; at lib.rs:61; rating::init(cx); at lib.rs:131"}
+  ],
+  "summary": {"passed": 8, "failed": 0, "total": 8, "pass_rate": 1.0}
+}

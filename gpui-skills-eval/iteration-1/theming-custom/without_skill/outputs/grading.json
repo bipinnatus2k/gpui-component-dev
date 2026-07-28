@@ -1,0 +1,55 @@
+{
+  "expectations": [
+    {
+      "text": "Creates or modifies a theme file with ThemeConfig JSON",
+      "passed": true,
+      "evidence": "themes.rs:117-136 contains serde_json::json!({...}) building a ThemeConfig"
+    },
+    {
+      "text": "Uses serde_json::json! macro to build config",
+      "passed": true,
+      "evidence": "themes.rs:117 uses serde_json::json!({...})"
+    },
+    {
+      "text": "Sets primary to #7C3AED or similar purple",
+      "passed": true,
+      "evidence": "themes.rs:124 sets primary.background: #7C3AED"
+    },
+    {
+      "text": "Sets background to #0F0A1E or similar dark",
+      "passed": true,
+      "evidence": "themes.rs:122 sets background: #0F0A1E"
+    },
+    {
+      "text": "Sets foreground to #EDE9FE or similar light",
+      "passed": true,
+      "evidence": "themes.rs:123 sets foreground: #EDE9FE"
+    },
+    {
+      "text": "Sets radius to 8",
+      "passed": true,
+      "evidence": "themes.rs:120 sets radius: 8"
+    },
+    {
+      "text": "Uses Theme::global_mut(cx).apply_config() pattern",
+      "passed": true,
+      "evidence": "themes.rs:139: Theme::global_mut(cx).apply_config(&Rc::new(config))"
+    },
+    {
+      "text": "Uses std::rc::Rc for the config",
+      "passed": true,
+      "evidence": "themes.rs:1 imports std::rc::Rc; themes.rs:139 wraps config in Rc::new(config)"
+    },
+    {
+      "text": "Dark mode is specified",
+      "passed": true,
+      "evidence": "themes.rs:119 sets mode: dark"
+    }
+  ],
+  "summary": {
+    "passed": 9,
+    "failed": 0,
+    "total": 9,
+    "pass_rate": 1.0
+  }
+}

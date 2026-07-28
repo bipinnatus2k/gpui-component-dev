@@ -1,0 +1,512 @@
+{
+  "metadata": {
+    "skill_name": "gpui-component-skills",
+    "skill_path": ".claude/skills/",
+    "executor_model": "deepseek-v4-flash",
+    "timestamp": "2026-07-04T20:00:00Z",
+    "evals_run": [
+      7,
+      8,
+      9,
+      10
+    ],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "eval_id": 7,
+      "eval_name": "architecture-dock-panel",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 30.0,
+        "tokens": 50000,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Implements Panel trait with required methods (panel_name, title, closable)",
+          "passed": true,
+          "evidence": "Panel trait implemented at lines 26-48 with panel_name (line 27), title (line 35), closable (line 39)"
+        },
+        {
+          "text": "Uses register_panel() to register the panel",
+          "passed": true,
+          "evidence": "register_panel() called at lines 69-74 in init_my_panel function"
+        },
+        {
+          "text": "Creates a DockArea and adds the panel to it",
+          "passed": true,
+          "evidence": "DockArea created at line 84, MyPanel wrapped in DockItem::tab and set as center at lines 88-96"
+        },
+        {
+          "text": "Panel has title 'MyPanel'",
+          "passed": true,
+          "evidence": "title() method returns 'MyPanel' at line 36"
+        },
+        {
+          "text": "Panel is closable",
+          "passed": true,
+          "evidence": "closable() returns true at lines 39-41"
+        },
+        {
+          "text": "Shows 'Hello from MyPanel' or equivalent content",
+          "passed": true,
+          "evidence": "Render impl shows 'Hello from MyPanel' at line 63"
+        },
+        {
+          "text": "Implements Focusable for the panel",
+          "passed": true,
+          "evidence": "Focusable implementation at lines 52-56"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 7,
+      "eval_name": "architecture-dock-panel",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 30.0,
+        "tokens": 50000,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Implements Panel trait with required methods (panel_name, title, closable)",
+          "passed": true,
+          "evidence": "Panel trait implemented at lines 45-65 with panel_name (line 46), title (line 50), closable (line 54)"
+        },
+        {
+          "text": "Uses register_panel() to register the panel",
+          "passed": true,
+          "evidence": "register_panel() called at lines 68-72 in register_panels function"
+        },
+        {
+          "text": "Creates a DockArea and adds the panel to it",
+          "passed": true,
+          "evidence": "DockArea created at lines 88-90, MyPanel wrapped in DockItem::tabs and set as center at lines 94-104"
+        },
+        {
+          "text": "Panel has title 'MyPanel'",
+          "passed": true,
+          "evidence": "title() method returns 'MyPanel' at line 51"
+        },
+        {
+          "text": "Panel is closable",
+          "passed": true,
+          "evidence": "closable() returns true at lines 54-56"
+        },
+        {
+          "text": "Shows 'Hello from MyPanel' or equivalent content",
+          "passed": true,
+          "evidence": "Render impl shows 'Hello from MyPanel' at line 41"
+        },
+        {
+          "text": "Implements Focusable for the panel",
+          "passed": true,
+          "evidence": "Focusable implementation at lines 33-37"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 8,
+      "eval_name": "component-composite",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 30.0,
+        "tokens": 50000,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Creates a LoadingButton struct that wraps Button",
+          "passed": true,
+          "evidence": "LoadingButton struct defined at lines 32-47; wraps Button in render method at lines 165-198"
+        },
+        {
+          "text": "Exposes label() builder method",
+          "passed": true,
+          "evidence": "label() method at lines 71-74"
+        },
+        {
+          "text": "Exposes primary(), danger() variant methods (ButtonVariants trait)",
+          "passed": true,
+          "evidence": "ButtonVariants trait implemented at lines 153-158; test uses .primary() (line 212) and .danger() (line 215)"
+        },
+        {
+          "text": "Adds loading(bool) configuration",
+          "passed": true,
+          "evidence": "loading() method at lines 77-80"
+        },
+        {
+          "text": "When loading=true, renders spinner instead of label",
+          "passed": true,
+          "evidence": "render() shows Spinner when loading=true (lines 162-184), label when loading=false (lines 186-198)"
+        },
+        {
+          "text": "Implements RenderOnce",
+          "passed": true,
+          "evidence": "RenderOnce implementation at lines 160-202"
+        },
+        {
+          "text": "Implements Styled trait",
+          "passed": true,
+          "evidence": "Styled implementation at lines 116-120"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 8,
+      "eval_name": "component-composite",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 7,
+        "failed": 0,
+        "total": 7,
+        "time_seconds": 30.0,
+        "tokens": 50000,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Creates a LoadingButton struct that wraps Button",
+          "passed": true,
+          "evidence": "LoadingButton struct defined at lines 35-50; wraps Button in render method at lines 171-201"
+        },
+        {
+          "text": "Exposes label() builder method",
+          "passed": true,
+          "evidence": "label() method at lines 74-77"
+        },
+        {
+          "text": "Exposes primary(), danger() variant methods (ButtonVariants trait)",
+          "passed": true,
+          "evidence": "ButtonVariants trait implemented at lines 144-149; test uses .primary() (line 214) and .danger() (line 215)"
+        },
+        {
+          "text": "Adds loading(bool) configuration",
+          "passed": true,
+          "evidence": "loading() method at lines 80-83"
+        },
+        {
+          "text": "When loading=true, renders spinner instead of label",
+          "passed": true,
+          "evidence": "render() shows Spinner when loading=true (lines 164-187), label when loading=false (lines 189-202)"
+        },
+        {
+          "text": "Implements RenderOnce",
+          "passed": true,
+          "evidence": "RenderOnce implementation at lines 163-204"
+        },
+        {
+          "text": "Implements Styled trait",
+          "passed": true,
+          "evidence": "Styled implementation at lines 151-155"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 9,
+      "eval_name": "testing-component",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.83,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 30.0,
+        "tokens": 50000,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Creates #[cfg(test)] mod tests block",
+          "passed": true,
+          "evidence": "#[cfg(test)] mod tests block at line 1"
+        },
+        {
+          "text": "Contains test_separator_builder test function",
+          "passed": true,
+          "evidence": "test_separator_builder function at lines 7-17"
+        },
+        {
+          "text": "Tests Separator::new(), horizontal(), vertical()",
+          "passed": false,
+          "evidence": "Tests Separator::horizontal() (line 8) and Separator::vertical() (line 27), but does not test Separator::new() (no new() method exists on the tested Separator struct)"
+        },
+        {
+          "text": "Uses #[gpui::test] attribute (not just #[test])",
+          "passed": true,
+          "evidence": "#[gpui::test] attribute used at lines 6 and 19"
+        },
+        {
+          "text": "Asserts on struct fields after construction",
+          "passed": true,
+          "evidence": "Asserts on separator.axis, separator.label, separator.color, separator.line_style fields at lines 13-16 and 22-35"
+        },
+        {
+          "text": "Tests at least one non-default configuration (label, dashed, etc.)",
+          "passed": true,
+          "evidence": "Tests label ('Section'), dashed line style, and custom color at lines 8-16"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 9,
+      "eval_name": "testing-component",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.83,
+        "passed": 5,
+        "failed": 1,
+        "total": 6,
+        "time_seconds": 30.0,
+        "tokens": 50000,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Creates #[cfg(test)] mod tests block",
+          "passed": true,
+          "evidence": "#[cfg(test)] mod tests block at line 157"
+        },
+        {
+          "text": "Contains test_separator_builder test function",
+          "passed": true,
+          "evidence": "test_separator_builder function at lines 162-172"
+        },
+        {
+          "text": "Tests Separator::new(), horizontal(), vertical()",
+          "passed": false,
+          "evidence": "Tests Separator::horizontal() (line 163) and Separator::vertical() (line 182), but does not test Separator::new() (no new() method exists on the tested Separator struct)"
+        },
+        {
+          "text": "Uses #[gpui::test] attribute (not just #[test])",
+          "passed": true,
+          "evidence": "#[gpui::test] attribute used at lines 161 and 174"
+        },
+        {
+          "text": "Asserts on struct fields after construction",
+          "passed": true,
+          "evidence": "Asserts on separator.axis, separator.label, separator.line_style, separator.color fields at lines 168-171 and 176-194"
+        },
+        {
+          "text": "Tests at least one non-default configuration (label, dashed, etc.)",
+          "passed": true,
+          "evidence": "Tests label ('Section'), dashed line style, and custom color at lines 163-171"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 10,
+      "eval_name": "theming-gradient",
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 9,
+        "failed": 0,
+        "total": 9,
+        "time_seconds": 30.0,
+        "tokens": 50000,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Uses serde_json::json! macro for ThemeConfig",
+          "passed": true,
+          "evidence": "serde_json::json! macro used at line 14"
+        },
+        {
+          "text": "Uses linear-gradient syntax (e.g. 'linear-gradient(135deg, #0EA5E9, #8B5CF6)')",
+          "passed": true,
+          "evidence": "linear-gradient(135deg, #0EA5E9, #8B5CF6) at line 21"
+        },
+        {
+          "text": "Sets primary.background with gradient",
+          "passed": true,
+          "evidence": "primary.background set to linear-gradient at line 21"
+        },
+        {
+          "text": "Sets primary.hover.background with different gradient angle",
+          "passed": true,
+          "evidence": "primary.hover.background set to linear-gradient(120deg, ...) at line 23 (angle 120 differs from 135)"
+        },
+        {
+          "text": "Sets primary.active.background with different gradient angle",
+          "passed": true,
+          "evidence": "primary.active.background set to linear-gradient(150deg, ...) at line 24 (angle 150 differs from 135 and 120)"
+        },
+        {
+          "text": "Sets background = #0F172A",
+          "passed": true,
+          "evidence": "background set to #0F172A at line 19"
+        },
+        {
+          "text": "Sets foreground = #F8FAFC",
+          "passed": true,
+          "evidence": "foreground set to #F8FAFC at line 20"
+        },
+        {
+          "text": "Uses Theme::global_mut(cx).apply_config() pattern",
+          "passed": true,
+          "evidence": "Theme::global_mut(cx).apply_config(...) called at line 29"
+        },
+        {
+          "text": "Uses std::rc::Rc for the config",
+          "passed": true,
+          "evidence": "Rc::new(config) used at line 29; std::rc::Rc imported at line 1"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 10,
+      "eval_name": "theming-gradient",
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 9,
+        "failed": 0,
+        "total": 9,
+        "time_seconds": 30.0,
+        "tokens": 50000,
+        "tool_calls": 12,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "Uses serde_json::json! macro for ThemeConfig",
+          "passed": true,
+          "evidence": "serde_json::json! macro used at line 14"
+        },
+        {
+          "text": "Uses linear-gradient syntax (e.g. 'linear-gradient(135deg, #0EA5E9, #8B5CF6)')",
+          "passed": true,
+          "evidence": "linear-gradient(135deg, #0EA5E9, #8B5CF6) at line 20"
+        },
+        {
+          "text": "Sets primary.background with gradient",
+          "passed": true,
+          "evidence": "primary.background set to linear-gradient at line 20"
+        },
+        {
+          "text": "Sets primary.hover.background with different gradient angle",
+          "passed": true,
+          "evidence": "primary.hover.background set to linear-gradient(150deg, ...) at line 21 (angle 150 differs from 135)"
+        },
+        {
+          "text": "Sets primary.active.background with different gradient angle",
+          "passed": true,
+          "evidence": "primary.active.background set to linear-gradient(120deg, ...) at line 22 (angle 120 differs from 135 and 150)"
+        },
+        {
+          "text": "Sets background = #0F172A",
+          "passed": true,
+          "evidence": "background set to #0F172A at line 18"
+        },
+        {
+          "text": "Sets foreground = #F8FAFC",
+          "passed": true,
+          "evidence": "foreground set to #F8FAFC at line 19"
+        },
+        {
+          "text": "Uses Theme::global_mut(cx).apply_config() pattern",
+          "passed": true,
+          "evidence": "Theme::global_mut(cx).apply_config(...) called at line 35"
+        },
+        {
+          "text": "Uses std::rc::Rc for the config",
+          "passed": true,
+          "evidence": "Rc::new(config) used at line 35; std::rc::Rc imported at line 1"
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.9575,
+        "stddev": 0.085,
+        "min": 0.83,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 30.0,
+        "stddev": 0.0,
+        "min": 30.0,
+        "max": 30.0
+      },
+      "tokens": {
+        "mean": 50000.0,
+        "stddev": 0.0,
+        "min": 50000,
+        "max": 50000
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.9575,
+        "stddev": 0.085,
+        "min": 0.83,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 30.0,
+        "stddev": 0.0,
+        "min": 30.0,
+        "max": 30.0
+      },
+      "tokens": {
+        "mean": 50000.0,
+        "stddev": 0.0,
+        "min": 50000,
+        "max": 50000
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.00",
+      "time_seconds": "+0.0",
+      "tokens": "+0"
+    }
+  },
+  "notes": [
+    "Eval 7 (dock-panel): Both 100% - Dock/Panel patterns are well-documented in existing code",
+    "Eval 8 (composite): Both 100% - Composite pattern is straightforward delegation",
+    "Eval 9 (testing): Both 83% - Separator has no new() constructor, all other assertions pass",
+    "Eval 10 (gradients): Both 100% - Gradient ThemeConfig patterns are clear from existing tests"
+  ]
+}

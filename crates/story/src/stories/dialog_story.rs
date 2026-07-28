@@ -23,13 +23,26 @@ use gpui_component::date_picker::{DatePicker, DatePickerState};
 
 use crate::{TestAction, section};
 
+#[cfg(feature = "time")]
 pub struct DialogStory {
     focus_handle: FocusHandle,
     selected_value: Option<SharedString>,
     input1: Entity<InputState>,
     input2: Entity<InputState>,
-    #[cfg(feature = "time")]
     date: Entity<DatePickerState>,
+    select: Entity<SelectState<Vec<String>>>,
+    table: Entity<TableState<MyTable>>,
+    dialog_overlay: bool,
+    close_button: bool,
+    keyboard: bool,
+    overlay_closable: bool,
+}
+#[cfg(not(feature = "time"))]
+pub struct DialogStory {
+    focus_handle: FocusHandle,
+    selected_value: Option<SharedString>,
+    input1: Entity<InputState>,
+    input2: Entity<InputState>,
     select: Entity<SelectState<Vec<String>>>,
     table: Entity<TableState<MyTable>>,
     dialog_overlay: bool,
@@ -172,22 +185,26 @@ impl DialogStory {
                     move |_, window, cx| {
                         view.update(cx, |view, cx| {
                             #[cfg(feature = "time")]
-                            view.selected_value = Some(
-                                format!(
-                                    "Hello, {}, date: {}",
-                                    input1.read(cx).value(),
-                                    date.read(cx).date()
-                                )
-                                .into(),
-                            );
-                            #[!cfg(feature = "time")]
-                            view.selected_value = Some(
-                                format!(
-                                    "Hello, {}",
-                                    input1.read(cx).value(),
-                                )
-                                    .into(),
-                            );
+                            {
+                                view.selected_value = Some(
+                                    format!(
+                                        "Hello, {}, date: {}",
+                                        input1.read(cx).value(),
+                                        date.read(cx).date()
+                                    )
+                                        .into(),
+                                );
+                            }
+                            #[cfg(not(feature = "time"))]
+                            {
+                                view.selected_value = Some(
+                                    format!(
+                                        "Hello, {}",
+                                        input1.read(cx).value(),
+                                    )
+                                        .into(),
+                                );
+                            }
                         });
                         window.push_notification("You have pressed confirm.", cx);
                         true
@@ -219,7 +236,8 @@ impl DialogStory {
                                     .child(Input::new(&input1))
                                     .child(Select::new(&select))
                                     .child(DatePicker::new(&date).placeholder("Date of Birth")),
-                                #[!cfg(feature = "time")]
+
+                                #[cfg(not(feature = "time"))]
                                 v_flex()
                                     .px_4()
                                     .pb_4()

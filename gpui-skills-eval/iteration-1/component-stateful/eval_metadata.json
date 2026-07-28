@@ -1,0 +1,10 @@
+{"eval_id": 2, "eval_name": "component-stateful", "prompt": "I need to create a Rating component (crates/ui/src/rating.rs)...", "assertions": [
+  "Creates or modifies crates/ui/src/rating.rs",
+  "Defines a RatingState struct that is created via cx.new()",
+  "RatingState implements EventEmitter<RatingEvent>",
+  "Rating element takes Entity<RatingState> via new()",
+  "Implements Sizable trait for Rating",
+  "Handles click interaction to set rating value",
+  "Handles hover interaction for preview",
+  "Has init() function registered in lib.rs init()"
+]}

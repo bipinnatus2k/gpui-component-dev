@@ -1,0 +1,13 @@
+{
+  "expectations": [
+    {"text": "Creates examples/input_subscription/Cargo.toml with gpui-component-assets", "passed": true, "evidence": "Cargo.toml exists with 'gpui-component-assets.workspace = true' at line 13"},
+    {"text": "Creates examples/input_subscription/src/main.rs", "passed": true, "evidence": "main.rs exists (87 lines) with Example struct and Render impl"},
+    {"text": "Uses Input::new() with Entity<InputState>", "passed": true, "evidence": "input_state: Entity<InputState> field at line 9, Input::new(&self.input_state) at line 62"},
+    {"text": "Uses cx.subscribe_in() for InputEvent::Change", "passed": true, "evidence": "cx.subscribe_in(&input_state, window, ...) at line 18, InputEvent::Change matched at line 21"},
+    {"text": "Stores Subscription in a Vec<Subscription> field", "passed": true, "evidence": "_subscriptions: Vec<Subscription> field at line 11"},
+    {"text": "Updates display text on InputEvent::Change", "passed": true, "evidence": "this.display_text = format!(\"You typed: {}\", value).into() inside InputEvent::Change arm at line 26"},
+    {"text": "Calls cx.notify() on change", "passed": true, "evidence": "cx.notify() at line 28 inside InputEvent::Change arm"},
+    {"text": "Adds example to workspace Cargo.toml members if needed", "passed": true, "evidence": "\"examples/input_subscription\" added to workspace members at line 23 of workspace-Cargo.toml"}
+  ],
+  "summary": {"passed": 8, "failed": 0, "total": 8, "pass_rate": 1.0}
+}

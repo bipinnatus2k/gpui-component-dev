@@ -1,0 +1,55 @@
+{
+  "expectations": [
+    {
+      "text": "Creates examples/counter/Cargo.toml with correct workspace deps",
+      "passed": true,
+      "evidence": "Created examples/counter/Cargo.toml with workspace dependencies: gpui.workspace = true, gpui_platform.workspace = true, gpui-component = { workspace = true }, anyhow.workspace = true"
+    },
+    {
+      "text": "Creates examples/counter/src/main.rs",
+      "passed": true,
+      "evidence": "Created examples/counter/src/main.rs containing counter example with struct Example, Render impl, and main function"
+    },
+    {
+      "text": "main.rs calls gpui_component::init(cx) first in run()",
+      "passed": true,
+      "evidence": "gpui_component::init(cx) is called at line 38, the first statement in the app.run(move |cx| { ... }) closure"
+    },
+    {
+      "text": "Uses cx.spawn(async move {}).detach() pattern",
+      "passed": true,
+      "evidence": "Lines 46-53: cx.spawn(async move |cx| { cx.open_window(...) }).detach()"
+    },
+    {
+      "text": "Creates window with WindowBounds::centered (800x600)",
+      "passed": true,
+      "evidence": "Line 41: window_bounds: Some(WindowBounds::centered(size(px(800.), px(600.)), cx))"
+    },
+    {
+      "text": "Wraps view in Root::new()",
+      "passed": true,
+      "evidence": "Line 49: cx.new(|cx| Root::new(view, window, cx).bg(cx.theme().background))"
+    },
+    {
+      "text": "Has a counter state field and increment logic",
+      "passed": true,
+      "evidence": "Struct Example has count: u32 field (line 5) initialized to 0; on_click handler increments this.count += 1 (line 28) and calls cx.notify()"
+    },
+    {
+      "text": "Button uses primary() variant",
+      "passed": true,
+      "evidence": "Line 25: Button::new(\"increment\").primary().label(\"+1\")"
+    },
+    {
+      "text": "Adds example to workspace Cargo.toml members if needed",
+      "passed": true,
+      "evidence": "Git diff of Cargo.toml shows +    \"examples/counter\", added to workspace members"
+    }
+  ],
+  "summary": {
+    "passed": 9,
+    "failed": 0,
+    "total": 9,
+    "pass_rate": 1.0
+  }
+}

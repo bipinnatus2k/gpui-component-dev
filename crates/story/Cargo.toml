@@ -9,6 +9,7 @@ inspector = ["gpui-component/inspector"]
 time = ["gpui-component/time"]
 tree-sitter = ["gpui-component/tree-sitter-languages"]
 default = ["tree-sitter", "time"]
+none = []
 
 [dependencies]
 anyhow.workspace = true

@@ -1,0 +1,50 @@
+{
+  "expectations": [
+    {
+      "text": "Modifies or creates crates/story/src/stories/kbd_story.rs",
+      "passed": true,
+      "evidence": "kbd_story.rs present in outputs directory"
+    },
+    {
+      "text": "Implements Story trait with title() and new_view()",
+      "passed": true,
+      "evidence": "Line 14: impl super::Story for KbdStory with fn title() (line 16) and fn new_view() (line 23)"
+    },
+    {
+      "text": "Implements Focusable trait",
+      "passed": true,
+      "evidence": "Line 39: impl Focusable for KbdStory with fn focus_handle()"
+    },
+    {
+      "text": "Uses section() helper for organizing content",
+      "passed": true,
+      "evidence": "6 calls to section() at lines 49, 65, 78, 94, 114, 130"
+    },
+    {
+      "text": "Has multiple sections for different Kbd variants",
+      "passed": true,
+      "evidence": "6 sections: Common Shortcuts, Modifier Combinations, Platform Modifier Keys, Special Keys, Outline Style, Without Appearance"
+    },
+    {
+      "text": "Shows modifier keys (cmd, ctrl, shift, alt)",
+      "passed": true,
+      "evidence": "Uses cmd-c, cmd-v, ctrl-a, alt-a, shift-a, etc. throughout the story"
+    },
+    {
+      "text": "Shows combined key shortcuts",
+      "passed": true,
+      "evidence": "Uses cmd-shift-p, cmd-ctrl-t, cmd-ctrl-shift-a, cmd-alt-esc, cmd-ctrl-alt-shift-a, ctrl-alt-shift-win-a"
+    },
+    {
+      "text": "Registered in stories/mod.rs with mod + pub use",
+      "passed": true,
+      "evidence": "mod.rs present: line 34 has 'mod kbd_story;', line 102 has 'pub use kbd_story::KbdStory;'"
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 0,
+    "total": 8,
+    "pass_rate": 1.0
+  }
+}

@@ -1,6 +1,5 @@
 use gpui::{prelude::*, *};
-use gpui_component::{
-    ActiveTheme as _, Icon, IconName, Sizable as _,
+use gpui_component::{Icon, IconName, Sizable as _,
     button::{Button, ButtonVariants as _},
     h_flex,
     input::{Input, InputEvent, InputState},
@@ -59,11 +58,9 @@ impl Gallery {
                     #[cfg(feature = "time")]
                     StoryContainer::panel::<DatePickerStory>(window, cx),
                     StoryContainer::panel::<DescriptionListStory>(window, cx),
-                    #[cfg(feature = "time")]
                     StoryContainer::panel::<DialogStory>(window, cx),
                     StoryContainer::panel::<DropdownButtonStory>(window, cx),
                     StoryContainer::panel::<EditorStory>(window, cx),
-                    #[cfg(feature = "time")]
                     StoryContainer::panel::<FormStory>(window, cx),
                     StoryContainer::panel::<GroupBoxStory>(window, cx),
                     StoryContainer::panel::<HoverCardStory>(window, cx),
@@ -88,7 +85,6 @@ impl Gallery {
                     StoryContainer::panel::<SelectStory>(window, cx),
                     StoryContainer::panel::<SeparatorStory>(window, cx),
                     StoryContainer::panel::<SettingsStory>(window, cx),
-                    #[cfg(feature = "time")]
                     StoryContainer::panel::<SheetStory>(window, cx),
                     StoryContainer::panel::<SidebarStory>(window, cx),
                     StoryContainer::panel::<SkeletonStory>(window, cx),

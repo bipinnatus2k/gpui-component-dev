@@ -1,0 +1,11 @@
+{"eval_id": 3, "eval_name": "example-basic", "prompt": "Create a new example at examples/counter/...", "assertions": [
+  "Creates examples/counter/Cargo.toml with correct workspace deps",
+  "Creates examples/counter/src/main.rs",
+  "main.rs calls gpui_component::init(cx) first in run()",
+  "Uses cx.spawn(async move {}).detach() pattern",
+  "Creates window with WindowBounds::centered (800x600)",
+  "Wraps view in Root::new()",
+  "Has a counter state field and increment logic",
+  "Button uses primary() variant",
+  "Adds example to workspace Cargo.toml members if needed"
+]}

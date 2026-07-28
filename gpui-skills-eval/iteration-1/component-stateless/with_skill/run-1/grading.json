@@ -1,0 +1,83 @@
+{
+  "expectations": [
+    {
+      "text": "Creates or modifies crates/ui/src/label.rs",
+      "passed": true,
+      "evidence": "File outputs/label.rs exists with 95 lines of valid Label component implementation. The actual project file crates/ui/src/label.rs contains identical content."
+    },
+    {
+      "text": "Uses #[derive(IntoElement)] on the Label struct",
+      "passed": true,
+      "evidence": "Line 9: `#[derive(IntoElement)]` on the `pub struct Label` definition."
+    },
+    {
+      "text": "Implements Styled trait with style() -> &mut StyleRefinement",
+      "passed": true,
+      "evidence": "Lines 42-46: `impl Styled for Label` with `fn style(&mut self) -> &mut StyleRefinement`."
+    },
+    {
+      "text": "Implements Sizable trait with with_size() method",
+      "passed": true,
+      "evidence": "Lines 35-40: `impl Sizable for Label` with `fn with_size(mut self, size: impl Into<Size>) -> Self`."
+    },
+    {
+      "text": "Implements RenderOnce trait",
+      "passed": true,
+      "evidence": "Lines 48-67: `impl RenderOnce for Label` with `fn render(self, _: &mut Window, cx: &mut App) -> impl IntoElement`."
+    },
+    {
+      "text": "Has builder pattern: new() constructor + chainable methods",
+      "passed": true,
+      "evidence": "Line 19: `pub fn new(text: impl Into<SharedString>) -> Self`. Chainable methods include `muted()` (line 29), and Sizable trait provides `with_size()`, `xsmall()`, `small()`, `large()`. Tests demonstrate chaining: `Label::new(\"Hello World\").muted().small()`."
+    },
+    {
+      "text": "Supports muted variant (sets muted_foreground color)",
+      "passed": true,
+      "evidence": "Line 29: `pub fn muted(mut self) -> Self` sets `self.muted = true`. Lines 51-55 in render: when muted is true, uses `cx.theme().muted_foreground`; otherwise uses `cx.theme().foreground`."
+    },
+    {
+      "text": "Size convenience methods: xsmall(), small(), large()",
+      "passed": true,
+      "evidence": "Methods are provided by the `Sizable` trait (which Label implements at lines 35-40). Tests at lines 90-94 demonstrate usage: `Label::new(\"xs\").xsmall()`, `Label::new(\"sm\").small()`, `Label::new(\"lg\").large()`."
+    },
+    {
+      "text": "Registered or mentioned as pub mod label in lib.rs",
+      "passed": true,
+      "evidence": "`pub mod label;` exists at line 50 in crates/ui/src/lib.rs."
+    }
+  ],
+  "summary": {
+    "passed": 9,
+    "failed": 0,
+    "total": 9,
+    "pass_rate": 1.0
+  },
+  "claims": [
+    {
+      "claim": "Label renders text with foreground or muted_foreground dependent on muted flag",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Render function at lines 49-66 checks `self.muted` to choose between `cx.theme().muted_foreground` and `cx.theme().foreground`."
+    },
+    {
+      "claim": "Label has test coverage for builder, default size, and size methods",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Three tests at lines 73-94: `test_label_builder`, `test_label_default_size`, `test_label_size_methods`."
+    },
+    {
+      "claim": "The output file is a complete, compilable Rust module",
+      "type": "quality",
+      "verified": true,
+      "evidence": "All necessary imports, struct definition, trait implementations (Styled, Sizable, RenderOnce), and tests are present and self-consistent."
+    }
+  ],
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "Assertion 9 (lib.rs registration) is satisfied but could have been pre-existing — the eval would pass even if the executor never touched lib.rs. Consider verifying it was actually added or modified by the executor (e.g., check git diff)."
+      }
+    ],
+    "overall": "No suggestions, evals look solid"
+  }
+}

@@ -1,0 +1,10 @@
+{"eval_id": 4, "eval_name": "example-input-subscription", "prompt": "Create an example in examples/input_subscription/...", "assertions": [
+  "Creates examples/input_subscription/Cargo.toml with gpui-component-assets",
+  "Creates examples/input_subscription/src/main.rs",
+  "Uses Input::new() with Entity<InputState>",
+  "Uses cx.subscribe_in() for InputEvent::Change",
+  "Stores Subscription in a Vec<Subscription> field",
+  "Updates display text on InputEvent::Change",
+  "Calls cx.notify() on change",
+  "Adds example to workspace Cargo.toml members if needed"
+]}

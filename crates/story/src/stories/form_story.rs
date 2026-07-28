@@ -242,7 +242,7 @@ impl Render for FormStory {
                             .label("Please select your birthday")
                             .description("Select your birthday, we will send you a gift.")
                             .child(DatePicker::new(&self.date)),
-                        #[!cfg(feature = "time")]
+                        #[cfg(not(feature = "time"))]
                         div()
                     )
                     .child(

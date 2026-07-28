@@ -1,0 +1,75 @@
+{
+  "skill_name": "gpui-component-skills",
+  "evals": [
+    {
+      "id": 1,
+      "name": "component-stateless",
+      "prompt": "I need to create a simple Label component in crates/ui/src/label.rs. It should render text with configurable size (xs/sm/md/lg), support a muted variant for secondary text, and use builder pattern. Look at the existing Button component (crates/ui/src/button/button.rs) and styled.rs for the pattern. The Label should be stateless (RenderOnce). It needs to implement Styled, Sizable, and RenderOnce traits. Register it in lib.rs.",
+      "expected_output": "A complete Label component implementation following the stateless pattern with builder methods, proper traits, and registration.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "component-stateful",
+      "prompt": "I need to create a Rating component (crates/ui/src/rating.rs) that shows star ratings. It should use a stateful pattern with RatingState as an Entity. The component needs: 1) Click to set rating, 2) Hover preview, 3) Sizable trait for different star sizes, 4) Display numeric value. Look at how Input uses InputState (crates/ui/src/input/) for the Entity pattern. Register it in lib.rs.",
+      "expected_output": "A complete Rating component with RatingState Entity and Rating element following the stateful pattern.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "example-basic",
+      "prompt": "Create a new example at examples/hello_world/ that shows a window with a title 'Hello GPUI' and a primary button that increments a counter displayed on screen. Follow the exact entry point pattern from the project's existing examples. Use gpui_platform::application() (no assets needed). The window should be 800x600 centered. Wrap the view in Root.",
+      "expected_output": "A complete Cargo.toml and src/main.rs for a working example application with counter button.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "example-input-subscription",
+      "prompt": "Create an example in examples/input_subscription/ that shows an Input component and below it a label that updates in real-time as the user types. Use the subscription pattern with cx.subscribe_in() and InputEvent::Change. The assets are needed (gpui-component-assets). Window size 800x600 centered.",
+      "expected_output": "A complete example with Input component, subscription wiring, and real-time text display.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "story-basic",
+      "prompt": "Create a story file for a new Kbd component at crates/story/src/stories/kbd_story.rs. The Kbd component renders keyboard shortcut text. The story should use the Story trait, have a section() for different Kbd variants (macOS vs Windows modifiers, combined keys), and use the section() helper. Register it in stories/mod.rs. Look at badge_story.rs or label_story.rs for the pattern.",
+      "expected_output": "A complete story file with Story trait impl, section() usage, and proper registration.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "name": "theming-custom",
+      "prompt": "I want to add a custom theme to the story gallery. Create a function that applies a 'Midnight Purple' dark theme via ThemeConfig JSON with: primary = #7C3AED (purple), background = #0F0A1E, foreground = #EDE9FE, border radius = 8px. Use Theme::global_mut(cx).apply_config() pattern.",
+      "expected_output": "A complete theme application function with proper ThemeConfig JSON structure and color key naming convention.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "name": "architecture-dock-panel",
+      "prompt": "I want to understand how the Dock/Panel layout system works in gpui-component. Create a minimal example that shows how to: 1) Define a custom panel by implementing the Panel trait, 2) Register it with register_panel(), 3) Add it to a DockArea. Look at crates/ui/src/dock/ for the Panel trait and crates/story/src/gallery.rs for how panels are registered. The panel should have a title 'MyPanel', be closable, and show 'Hello from MyPanel' as content.",
+      "expected_output": "A complete custom panel implementation with Panel trait, register_panel registration, and DockArea integration.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "name": "component-composite",
+      "prompt": "Create a composite LoadingButton component that wraps the existing Button component with a loading spinner. It should: 1) Delegate to Button::new() internally, 2) Expose label(), primary(), danger() variant methods, 3) Add loading(bool) and spinner_text() configuration, 4) When loading=true, show a spinner icon instead of the button label. Look at how AlertDialog wraps Dialog (crates/ui/src/dialog/alert_dialog.rs) as a reference pattern. The component should implement RenderOnce when finished.",
+      "expected_output": "A complete LoadingButton composite component delegating to Button with loading state and spinner support.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "name": "testing-component",
+      "prompt": "Write tests for the existing Separator component (crates/ui/src/separator.rs). The tests should cover: 1) Builder pattern test (test_separator_builder) verifying new(), horizontal(), vertical(), and label() work, 2) A test verifying the Separator struct fields after construction. Follow the test patterns from crates/ui/src/button/button.rs (test_button_builder etc). Use #[gpui::test] attribute where needed.",
+      "expected_output": "Complete test functions in a #[cfg(test)] mod tests block for the Separator component.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "name": "theming-gradient",
+      "prompt": "Add a custom 'Ocean Sunset' theme to the story gallery with gradient backgrounds. Use ThemeConfig with: primary = linear-gradient(135deg, #0EA5E9, #8B5CF6) for primary.background, background = #0F172A, foreground = #F8FAFC. The theme should also set primary.hover.background and primary.active.background with slightly different gradient angles. Write a function apply_ocean_sunset_theme(cx) that applies the theme. Look at how the existing test_outline_buttons_use_semantic_gradient_tokens test in button.rs constructs ThemeConfig with gradients.",
+      "expected_output": "A complete gradient theme function with proper linear-gradient syntax in ThemeConfig and correct color key naming.",
+      "files": []
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{"eval_id": 5, "eval_name": "story-basic", "prompt": "Create a story file for Kbd component at crates/story/src/stories/kbd_story.rs...", "assertions": [
+  "Modifies or creates crates/story/src/stories/kbd_story.rs",
+  "Implements Story trait with title() and new_view()",
+  "Implements Focusable trait",
+  "Uses section() helper for organizing content",
+  "Has multiple sections for different Kbd variants",
+  "Shows modifier keys (cmd, ctrl, shift, alt)",
+  "Shows combined key shortcuts",
+  "Registered in stories/mod.rs with mod + pub use"
+]}

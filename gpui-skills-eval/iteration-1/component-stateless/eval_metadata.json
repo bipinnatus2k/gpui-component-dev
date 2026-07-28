@@ -1,0 +1,11 @@
+{"eval_id": 1, "eval_name": "component-stateless", "prompt": "I need to create a simple Label component in crates/ui/src/label.rs...", "assertions": [
+  "Creates or modifies crates/ui/src/label.rs",
+  "Uses #[derive(IntoElement)] on the Label struct",
+  "Implements Styled trait with style() -> &mut StyleRefinement",
+  "Implements Sizable trait with with_size() method",
+  "Implements RenderOnce trait",
+  "Has builder pattern: new() constructor + chainable methods",
+  "Supports muted variant (sets muted_foreground color)",
+  "Size convenience methods: xsmall(), small(), large()",
+  "Registered or mentioned as pub mod label in lib.rs"
+]}
