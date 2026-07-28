@@ -35,8 +35,9 @@ pub fn derive_into_plot(input: TokenStream) -> TokenStream {
 
         impl #impl_generics gpui::Element for #type_name #type_generics #where_clause {
             type RequestLayoutState = ();
-            // Carries the prepainted tooltip overlay (if any) from `prepaint` to `paint`.
-            type PrepaintState = Option<gpui::AnyElement>;
+            // Carries the hitbox used for occlusion-aware hover detection and the
+            // prepainted tooltip overlay (if any) from `prepaint` to `paint`.
+            type PrepaintState = (Option<gpui::Hitbox>, Option<gpui::AnyElement>);
 
             fn id(&self) -> Option<gpui::ElementId> {
                 // `Some` opts the plot in to interactive tooltips; `None` (the default)
@@ -73,24 +74,42 @@ pub fn derive_into_plot(input: TokenStream) -> TokenStream {
                 cx: &mut gpui::App,
             ) -> Self::PrepaintState {
                 // No id => tooltips disabled => behave exactly like a non-interactive plot.
-                let global_id = global_id?;
+                let Some(global_id) = global_id else {
+                    return (None, None);
+                };
 
-                // Read the cursor position recorded by the previous frame's mouse handler.
-                let position = Self::__plot_tooltip_cursor(global_id, window).get()?;
-                let state = <Self as Plot>::tooltip_state(self, position, bounds, cx)?;
+                // The hitbox lets the mouse handler hit-test with occlusion awareness:
+                // `Hitbox::is_hovered` returns false while an occluding hitbox (e.g. an
+                // open popup menu) is above the plot, unlike a plain bounds test.
+                let hitbox = window.insert_hitbox(bounds, gpui::HitboxBehavior::Normal);
 
-                // Pass the live cursor so the tooltip box can follow it; the crosshair and
-                // dots in `state` stay snapped to the data point by `tooltip_state`.
-                let overlay = <Self as Plot>::tooltip(self, &state, position, bounds, window, cx)?;
+                let overlay = (|| {
+                    // The cell only gates visibility: it holds the cursor recorded by the
+                    // mouse handler / per-frame sync in `paint`, which is one frame stale
+                    // during scrolling. Rendering that cached point while the bounds move
+                    // makes the tooltip jitter, so derive the position from the live mouse
+                    // position and this frame's bounds instead.
+                    Self::__plot_tooltip_cursor(global_id, window).get()?;
+                    let mouse = window.mouse_position();
+                    if !bounds.contains(&mouse) {
+                        return None;
+                    }
+                    let position = mouse - bounds.origin;
+                    let state = <Self as Plot>::tooltip_state(self, position, bounds, cx)?;
 
-                // Defer the overlay so it paints above sibling content drawn after the plot
-                // (e.g. a chart card's footer text). The tooltip box can extend past the plot
-                // bounds; without deferral those later siblings would cover the overflow.
-                let mut overlay = gpui::IntoElement::into_any_element(
-                    gpui::deferred(overlay),
-                );
-                overlay.prepaint_as_root(bounds.origin, bounds.size.into(), window, cx);
-                Some(overlay)
+                    // Pass the live cursor so the tooltip box can follow it; the crosshair and
+                    // dots in `state` stay snapped to the data point by `tooltip_state`.
+                    //
+                    // The overlay paints in the plot's own layer, so the crosshair and dots stay
+                    // below content drawn over the plot. The tooltip box defers itself (see
+                    // `plot::tooltip::Tooltip`) to paint above sibling content, since it can
+                    // extend past the plot bounds.
+                    let mut overlay = <Self as Plot>::tooltip(self, &state, position, bounds, window, cx)?;
+                    overlay.prepaint_as_root(bounds.origin, bounds.size.into(), window, cx);
+                    Some(overlay)
+                })();
+
+                (Some(hitbox), overlay)
             }
 
             fn paint(
@@ -99,21 +118,48 @@ pub fn derive_into_plot(input: TokenStream) -> TokenStream {
                 _: Option<&gpui::InspectorElementId>,
                 bounds: gpui::Bounds<gpui::Pixels>,
                 _: &mut Self::RequestLayoutState,
-                overlay: &mut Self::PrepaintState,
+                prepaint: &mut Self::PrepaintState,
                 window: &mut gpui::Window,
                 cx: &mut gpui::App,
             ) {
                 <Self as Plot>::paint(self, bounds, window, cx);
 
-                if let Some(global_id) = global_id {
+                let (hitbox, overlay) = prepaint;
+
+                if let (Some(global_id), Some(hitbox)) = (global_id, hitbox.as_ref()) {
                     // Record the cursor position into element-local state on every move so the
                     // next frame can hit-test it. The handler never touches `self`, satisfying
-                    // the `'static` bound; it only captures the (Copy) bounds and the state cell.
+                    // the `'static` bound; it only captures the (Copy) bounds, the hitbox id
+                    // and the state cell.
                     let cell = Self::__plot_tooltip_cursor(global_id, window);
+                    let hitbox = hitbox.clone();
+
+                    // Scrolling (or any relayout) moves the plot under a stationary cursor
+                    // without emitting MouseMoveEvent, so re-derive the cursor state every
+                    // frame: `mouse_hit_test` is recomputed against this frame's hitboxes
+                    // right before paint, so `is_hovered` is fresh here. Only a visibility
+                    // flip needs a corrective frame — `prepaint` derives the tooltip position
+                    // from the live mouse, not from the cell. `refresh()` is a no-op while
+                    // drawing; schedule via `request_animation_frame`.
+                    let next = if hitbox.is_hovered(window) {
+                        Some(window.mouse_position() - bounds.origin)
+                    } else {
+                        None
+                    };
+                    if cell.get() != next {
+                        let visibility_changed = cell.get().is_some() != next.is_some();
+                        cell.set(next);
+                        if visibility_changed {
+                            window.request_animation_frame();
+                        }
+                    }
 
                     window.on_mouse_event(
                         move |e: &gpui::MouseMoveEvent, _, window: &mut gpui::Window, _| {
-                            let next = if bounds.contains(&e.position) {
+                            // `is_hovered` is false when an occluding hitbox (popup menu,
+                            // modal, ...) is above the cursor, so the tooltip clears instead
+                            // of tracking the mouse through the overlay.
+                            let next = if hitbox.is_hovered(window) {
                                 Some(e.position - bounds.origin)
                             } else {
                                 None
@@ -127,7 +173,8 @@ pub fn derive_into_plot(input: TokenStream) -> TokenStream {
                     );
                 }
 
-                // Paint the tooltip overlay (crosshair, dots, box) above the plot graphics.
+                // Paint the tooltip overlay (crosshair, dots) above the plot graphics; the
+                // deferred box paints later, above everything.
                 if let Some(overlay) = overlay.as_mut() {
                     overlay.paint(window, cx);
                 }

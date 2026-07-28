@@ -1,14 +1,6 @@
 #[cfg(feature = "code-editor")]
-use std::rc::Rc;
-#[cfg(feature = "code-editor")]
-use std::time::Duration;
-#[cfg(feature = "code-editor")]
 use std::cell::RefCell;
-use std::ops::Range;
-
-#[cfg(feature = "code-editor")]
-use gpui::Task;
-use gpui::{App, SharedString};
+use gpui::SharedString;
 use ropey::Rope;
 
 use super::display_map::DisplayMap;
@@ -293,6 +285,14 @@ impl InputMode {
 
                 let mut highlighter_ref = highlighter.borrow_mut();
                 if highlighter_ref.is_none() {
+                    // Do not create a highlighter if the language has no grammar.
+                    let has_grammar = LanguageRegistry::singleton()
+                        .language(language)
+                        .is_some_and(|config| config.has_grammar());
+                    if !has_grammar {
+                        return None;
+                    }
+
                     let new_highlighter = SyntaxHighlighter::new(language);
                     highlighter_ref.replace(new_highlighter);
                 }
@@ -304,7 +304,14 @@ impl InputMode {
                 let edit = replacement_input_edit(old_text, new_text, selected_range, change_text);
 
                 const SYNC_PARSE_TIMEOUT: Duration = Duration::from_millis(2);
-                let completed = h.update(Some(edit), new_text, Some(SYNC_PARSE_TIMEOUT));
+                // Skip parsing in the foreground above this threshold
+                const SYNC_PARSE_MAX_BYTES: usize = 256 * 1024;
+                let completed = if new_text.len() > SYNC_PARSE_MAX_BYTES {
+                    h.edit_tree(Some(edit), new_text);
+                    false
+                } else {
+                    h.update(Some(edit), new_text, Some(SYNC_PARSE_TIMEOUT))
+                };
                 if completed {
                     // Sync parse succeeded, cancel any pending background parse.
                     parse_task.borrow_mut().take();
@@ -326,20 +333,6 @@ impl InputMode {
         }
     }
 
-    #[cfg(not(feature = "code-editor"))]
-    pub(super) fn update_highlighter(
-        &mut self,
-        _selected_range: &Range<usize>,
-        _old_text: &Rope,
-        _new_text: &Rope,
-        _change_text: &str,
-        _force: bool,
-        _cx: &mut App,
-    ) -> Option<PendingBackgroundParse> {
-        None
-    }
-
-    #[cfg(feature = "code-editor")]
     #[allow(unused)]
     pub(super) fn diagnostics(&self) -> Option<&DiagnosticSet> {
         match self {
@@ -419,13 +412,10 @@ fn replacement_input_edit(
 
 #[cfg(test)]
 mod tests {
-    use ropey::Rope;
-
     use super::replacement_input_edit;
-    use crate::{
-        input::{Point, TabSize, mode::InputMode},
-        highlighter::DiagnosticSet,
-    };
+    use crate::
+    input::{TabSize, mode::InputMode},
+    ;
 
     #[test]
     #[cfg(feature = "code-editor")]
@@ -445,6 +435,7 @@ mod tests {
     #[test]
     #[cfg(feature = "code-editor")]
     #[cfg(not(target_family = "wasm"))]
+    #[cfg(feature = "tree-sitter")]
     fn test_replacement_input_edit_shifts_tree_sitter_included_ranges() {
         let old_source = "[1,2]";
         let new_source = "[1,2";

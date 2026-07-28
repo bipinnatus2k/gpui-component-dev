@@ -1,5 +1,6 @@
 use gpui::{prelude::*, *};
-use gpui_component::{Icon, IconName, Sizable as _,
+use gpui_component::{
+    Icon, IconName, Sizable as _,
     button::{Button, ButtonVariants as _},
     h_flex,
     input::{Input, InputEvent, InputState},
