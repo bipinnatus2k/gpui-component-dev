@@ -19,8 +19,6 @@ members = [
     "examples/sidebar",
     "examples/text_selection",
     "examples/root_borderless",
-    "examples/counter",
-    "examples/input_subscription",
 ]
 resolver = "2"
 

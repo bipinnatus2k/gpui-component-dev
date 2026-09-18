@@ -5,7 +5,7 @@ use gpui_component::{
     ActiveTheme, IconName, Selectable as _, Sizable as _, Size,
     button::{Button, ButtonGroup},
     h_flex,
-    rating::{Rating, RatingEvent, RatingState},
+    rating::Rating,
     v_flex,
 };
 
@@ -14,7 +14,7 @@ use crate::section;
 pub struct RatingStory {
     focus_handle: gpui::FocusHandle,
     size: Size,
-    state: Entity<RatingState>,
+    value: usize,
 }
 
 impl super::Story for RatingStory {
@@ -37,14 +37,10 @@ impl RatingStory {
     }
 
     fn new(_: &mut Window, cx: &mut Context<Self>) -> Self {
-        let state = cx.new(|_| RatingState::new(5, 3));
-        cx.subscribe(&state, |_, _: Entity<RatingState>, _: &RatingEvent, cx| {
-            cx.notify();
-        });
         Self {
             focus_handle: cx.focus_handle(),
             size: Size::default(),
-            state,
+            value: 3,
         }
     }
 }
@@ -61,8 +57,6 @@ pub fn init(_cx: &mut App) {
 
 impl Render for RatingStory {
     fn render(&mut self, _: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let disabled_state = cx.new(|_| RatingState::new(5, 2));
-
         v_flex()
             .w_full()
             .gap_3()
@@ -112,8 +106,14 @@ impl Render for RatingStory {
                         .justify_center()
                         .items_center()
                         .child(
-                            Rating::new(&self.state)
-                                .with_size(self.size),
+                            Rating::new("rating-1")
+                                .with_size(self.size)
+                                .value(self.value)
+                                .max(5)
+                                .on_click(cx.listener(|this, value: &usize, _, cx| {
+                                    this.value = *value;
+                                    cx.notify();
+                                })),
                         )
                         .child(
                             h_flex()
@@ -124,11 +124,9 @@ impl Render for RatingStory {
                                         .outline()
                                         .icon(IconName::Minus)
                                         .on_click(cx.listener(|this, _, _, cx| {
-                                            let mut v = this.state.read(cx).value();
-                                            v = v.saturating_sub(1);
-                                            this.state.update(cx, |state, cx| {
-                                                state.set_value(v, cx);
-                                            });
+                                            let v = this.value.saturating_sub(1);
+                                            this.value = v;
+                                            cx.notify();
                                         })),
                                 )
                                 .child(
@@ -137,11 +135,9 @@ impl Render for RatingStory {
                                         .outline()
                                         .icon(IconName::Plus)
                                         .on_click(cx.listener(|this, _, _, cx| {
-                                            let mut v = this.state.read(cx).value();
-                                            v = (v + 1).min(5);
-                                            this.state.update(cx, |state, cx| {
-                                                state.set_value(v, cx);
-                                            });
+                                            let v = (this.value + 1).min(5);
+                                            this.value = v;
+                                            cx.notify();
                                         })),
                                 ),
                         ),
@@ -149,17 +145,21 @@ impl Render for RatingStory {
             )
             .child(
                 section("Disabled").max_w_md().child(
-                    Rating::new(&disabled_state)
+                    Rating::new("rating-2")
                         .with_size(self.size)
+                        .value(2)
                         .color(cx.theme().green)
+                        .max(5)
                         .disabled(true),
                 ),
             )
             .child(
                 section("Custom Color").max_w_md().child(
-                    Rating::new(&self.state)
+                    Rating::new("rating-3")
                         .large()
-                        .color(cx.theme().green),
+                        .value(self.value)
+                        .color(cx.theme().green)
+                        .max(5),
                 ),
             )
     }

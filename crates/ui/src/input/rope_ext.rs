@@ -68,15 +68,15 @@ impl<'a> Iterator for RopeLines<'a> {
     }
 
     #[inline]
-    fn nth(&mut self, n: usize) -> Option<Self::Item> {
-        self.row = self.row.saturating_add(n);
-        self.next()
-    }
-
-    #[inline]
     fn size_hint(&self) -> (usize, Option<usize>) {
         let len = self.end_row - self.row;
         (len, Some(len))
+    }
+
+    #[inline]
+    fn nth(&mut self, n: usize) -> Option<Self::Item> {
+        self.row = self.row.saturating_add(n);
+        self.next()
     }
 }
 
@@ -281,6 +281,18 @@ pub trait RopeExt {
 }
 
 impl RopeExt for Rope {
+    fn line_start_offset(&self, row: usize) -> usize {
+        self.point_to_offset(Point::new(row, 0))
+    }
+
+    fn line_end_offset(&self, row: usize) -> usize {
+        if row > self.lines_len() {
+            return self.len();
+        }
+
+        self.line_start_offset(row) + self.line_len(row)
+    }
+
     fn slice_line(&self, row: usize) -> RopeSlice<'_> {
         let total_lines = self.lines_len();
         if row >= total_lines {
@@ -308,29 +320,27 @@ impl RopeExt for Rope {
         RopeLines::new(&self)
     }
 
+    fn lines_len(&self) -> usize {
+        self.len_lines(LineType::LF)
+    }
+
     fn line_len(&self, row: usize) -> usize {
         self.slice_line(row).len()
     }
 
-    fn line_start_offset(&self, row: usize) -> usize {
-        self.point_to_offset(Point::new(row, 0))
+    fn replace(&mut self, range: Range<usize>, new_text: &str) {
+        let range =
+            self.clip_offset(range.start, Bias::Left)..self.clip_offset(range.end, Bias::Right);
+        self.remove(range.clone());
+        self.insert(range.start, new_text);
     }
 
-    fn offset_to_point(&self, offset: usize) -> Point {
-        let offset = self.clip_offset(offset, Bias::Left);
-        let row = self.byte_to_line_idx(offset, LineType::LF);
-        let line_start = self.line_to_byte_idx(row, LineType::LF);
-        let column = offset.saturating_sub(line_start);
-        Point::new(row, column)
-    }
-
-    fn point_to_offset(&self, point: Point) -> usize {
-        if point.row >= self.lines_len() {
-            return self.len();
+    fn char_at(&self, offset: usize) -> Option<char> {
+        if offset > self.len() {
+            return None;
         }
 
-        let line_start = self.line_to_byte_idx(point.row, LineType::LF);
-        line_start + point.column
+        self.get_char(offset).ok()
     }
 
     fn position_to_offset(&self, pos: &Position) -> usize {
@@ -351,24 +361,21 @@ impl RopeExt for Rope {
         Position::new(point.row as u32, character as u32)
     }
 
-    fn line_end_offset(&self, row: usize) -> usize {
-        if row > self.lines_len() {
+    fn offset_to_point(&self, offset: usize) -> Point {
+        let offset = self.clip_offset(offset, Bias::Left);
+        let row = self.byte_to_line_idx(offset, LineType::LF);
+        let line_start = self.line_to_byte_idx(row, LineType::LF);
+        let column = offset.saturating_sub(line_start);
+        Point::new(row, column)
+    }
+
+    fn point_to_offset(&self, point: Point) -> usize {
+        if point.row >= self.lines_len() {
             return self.len();
         }
 
-        self.line_start_offset(row) + self.line_len(row)
-    }
-
-    fn lines_len(&self) -> usize {
-        self.len_lines(LineType::LF)
-    }
-
-    fn char_at(&self, offset: usize) -> Option<char> {
-        if offset > self.len() {
-            return None;
-        }
-
-        self.get_char(offset).ok()
+        let line_start = self.line_to_byte_idx(point.row, LineType::LF);
+        line_start + point.column
     }
 
     fn word_range(&self, offset: usize) -> Option<Range<usize>> {
@@ -423,13 +430,6 @@ impl RopeExt for Rope {
         self.byte_to_utf16_idx(offset)
     }
 
-    fn replace(&mut self, range: Range<usize>, new_text: &str) {
-        let range =
-            self.clip_offset(range.start, Bias::Left)..self.clip_offset(range.end, Bias::Right);
-        self.remove(range.clone());
-        self.insert(range.start, new_text);
-    }
-
     fn clip_offset(&self, offset: usize, bias: Bias) -> usize {
         if offset > self.len() {
             return self.len();
@@ -462,7 +462,8 @@ mod tests {
     use ropey::Rope;
     use sum_tree::Bias;
 
-    use crate::{RopeExt, input::Position};
+    use crate::{RopeExt};
+    use crate::input::Position;
 
     #[test]
     fn test_slice_line() {

@@ -77,11 +77,11 @@ impl InputMode {
         }
     }
 
-    #[inline]
-    #[cfg(not(feature = "code-editor"))]
-    pub(super) fn has_indent_guides(&self) -> bool {
-        false
-    }
+    // #[inline]
+    // #[cfg(not(feature = "code-editor"))]
+    // pub(super) fn has_indent_guides(&self) -> bool {
+    //     false
+    // }
 
     #[inline]
     pub(super) fn tab_size(&self) -> TabSize {
@@ -123,6 +123,8 @@ impl TextElement {
         text_style: &TextStyle,
         window: &mut Window,
     ) -> Option<Path<Pixels>> {
+
+        #[cfg(feature = "code-editor")]
         if !state.mode.has_indent_guides() {
             return None;
         }
@@ -217,7 +219,10 @@ impl InputState {
     ///
     /// Only for [`InputMode::PlainText`] and [`InputMode::CodeEditor`] mode with multi_line.
     pub fn tab_size(mut self, tab: TabSize) -> Self {
+        #[cfg(feature = "code-editor")]
         debug_assert!(self.mode.is_multi_line() || self.mode.is_code_editor());
+        #[cfg(not(feature = "code-editor"))]
+        debug_assert!(self.mode.is_multi_line());
         match &mut self.mode {
             InputMode::PlainText { tab: t, .. } => *t = tab,
             #[cfg(feature = "code-editor")]
@@ -234,6 +239,7 @@ impl InputState {
         cx: &mut Context<Self>,
     ) {
         // First, try to accept inline completion if present
+        #[cfg(feature = "code-editor")]
         if self.accept_inline_completion(window, cx) {
             return;
         }

@@ -3,118 +3,42 @@ use crate::{Disableable, Icon, IconName, Sizable, Size, StyledExt, h_flex};
 use std::rc::Rc;
 
 use gpui::{
-    App, Context, Entity, EventEmitter, InteractiveElement, IntoElement, ParentElement, RenderOnce,
-    StyleRefinement, Styled, Window, div, prelude::FluentBuilder as _,
+    App, ElementId, InteractiveElement, IntoElement, ParentElement, RenderOnce, StyleRefinement,
+    Styled, Window, div, prelude::FluentBuilder as _,
 };
-use gpui::{ClickEvent, Hsla, MouseMoveEvent, StatefulInteractiveElement};
+use gpui::{ClickEvent, Hsla, StatefulInteractiveElement};
 
-pub fn init(_: &mut App) {}
-
-/// Events emitted by [`RatingState`].
-#[derive(Clone, Debug, PartialEq)]
-pub enum RatingEvent {
-    /// The rating value changed.
-    Change(usize),
-}
-
-/// State for the Rating component.
-pub struct RatingState {
-    value: usize,
-    hovered_value: usize,
-    max: usize,
-}
-
-impl EventEmitter<RatingEvent> for RatingState {}
-
-impl RatingState {
-    /// Create a new [`RatingState`] with the given max and initial value.
-    pub fn new(max: usize, value: usize) -> Self {
-        Self {
-            value: value.min(max),
-            hovered_value: 0,
-            max,
-        }
-    }
-
-    /// Return the current rating value.
-    pub fn value(&self) -> usize {
-        self.value
-    }
-
-    /// Return the hovered star index (0 if not hovering).
-    pub fn hovered_value(&self) -> usize {
-        self.hovered_value
-    }
-
-    /// Return the maximum number of stars.
-    pub fn max_value(&self) -> usize {
-        self.max
-    }
-
-    /// Set the rating value and emit a [`RatingEvent::Change`].
-    pub fn set_value(&mut self, value: usize, cx: &mut Context<Self>) {
-        let v = value.min(self.max);
-        if self.value != v {
-            self.value = v;
-            cx.emit(RatingEvent::Change(v));
-            cx.notify();
-        }
-    }
-
-    /// Set the hovered star index.
-    pub fn set_hovered_value(&mut self, value: usize, cx: &mut Context<Self>) {
-        self.hovered_value = value;
-        cx.notify();
-    }
-
-    /// Reset the hovered value (typically on mouse leave).
-    pub fn reset_hover(&mut self, cx: &mut Context<Self>) {
-        self.hovered_value = 0;
-        cx.notify();
-    }
-}
-
-/// A star Rating element with managed state.
+/// A simple star Rating element.
 #[derive(IntoElement)]
 pub struct Rating {
-    state: Entity<RatingState>,
+    id: ElementId,
     style: StyleRefinement,
     size: Size,
     disabled: bool,
+    value: usize,
+    max: usize,
     color: Option<Hsla>,
-    show_value: bool,
     on_click: Option<Rc<dyn Fn(&usize, &mut Window, &mut App) + 'static>>,
 }
 
 impl Rating {
-    /// Create a new [`Rating`] bound to a [`RatingState`].
-    pub fn new(state: &Entity<RatingState>) -> Self {
+    /// Create a new Rating with an `ElementId`.
+    pub fn new(id: impl Into<ElementId>) -> Self {
         Self {
-            state: state.clone(),
+            id: id.into(),
             style: StyleRefinement::default(),
             size: Size::Medium,
             disabled: false,
+            value: 0,
+            max: 5,
             color: None,
-            show_value: false,
             on_click: None,
         }
     }
 
-    /// Set the star icon size.
-    pub fn star_size(mut self, size: impl Into<Size>) -> Self {
-        self.size = size.into();
-        self
-    }
-
-    /// Set the star icon size.
+    /// Set the star size.
     pub fn with_size(mut self, size: impl Into<Size>) -> Self {
         self.size = size.into();
-        self
-    }
-
-    /// Display the numeric value alongside the stars.
-    pub fn show_value(mut self) -> Self {
-        self.show_value = true;
         self
     }
 
@@ -124,24 +48,41 @@ impl Rating {
         self
     }
 
-    /// Set active star color, defaults to theme yellow.
+    /// Set active color, default will use `yellow` from theme colors.
     pub fn color(mut self, color: impl Into<Hsla>) -> Self {
         self.color = Some(color.into());
         self
     }
 
+    /// Set initial value (0..=max).
+    pub fn value(mut self, value: usize) -> Self {
+        self.value = value;
+        if self.value > self.max {
+            self.value = self.max;
+        }
+        self
+    }
+
+    /// Set maximum number of stars.
+    pub fn max(mut self, max: usize) -> Self {
+        self.max = max;
+        if self.value > self.max {
+            self.value = self.max;
+        }
+        self
+    }
+
     /// Add on_click handler when the rating changes.
-    pub fn on_click(
-        mut self,
-        handler: impl Fn(&usize, &mut Window, &mut App) + 'static,
-    ) -> Self {
+    ///
+    /// The `&usize` parameter is the new rating value.
+    pub fn on_click(mut self, handler: impl Fn(&usize, &mut Window, &mut App) + 'static) -> Self {
         self.on_click = Some(Rc::new(handler));
         self
     }
 }
 
 impl Styled for Rating {
-    fn style(&mut self) -> &mut StyleRefinement {
+    fn style(&mut self) -> &mut gpui::StyleRefinement {
         &mut self.style
     }
 }
@@ -160,82 +101,103 @@ impl Disableable for Rating {
     }
 }
 
+struct RaingState {
+    /// To save the default value on init state, to detect external value changes.
+    default_value: usize,
+    /// To store the current selected value.
+    value: usize,
+    /// To store the currently hovered value.
+    hovered_value: usize,
+}
+
 impl RenderOnce for Rating {
     fn render(self, window: &mut Window, cx: &mut App) -> impl IntoElement {
-        let entity_id = self.state.entity_id();
-        let state = self.state;
+        let id = self.id;
         let size = self.size;
-        let show_value = self.show_value;
-        let on_click = self.on_click;
+        let disabled = self.disabled;
+        let max = self.max;
+        let default_value = self.value;
         let active_color = self.color.unwrap_or(cx.theme().yellow);
+        let on_click = self.on_click.clone();
 
-        let read = state.read(cx);
-        let value = read.value;
-        let max = read.max;
-        let hovered_value = read.hovered_value;
+        let state = window.use_keyed_state(id.clone(), cx, |_, _| RaingState {
+            default_value,
+            value: default_value,
+            hovered_value: 0,
+        });
+
+        // Reset state if outside has changed `value` prop.
+        if state.read(cx).default_value != default_value {
+            state.update(cx, |state, _| {
+                state.default_value = default_value;
+                state.value = default_value;
+            });
+        }
+        let value = state.read(cx).value;
 
         h_flex()
-            .id(("rating", entity_id))
+            .id(id)
             .flex_nowrap()
-            .items_center()
-            .gap_1()
             .refine_style(&self.style)
-            .on_hover(window.listener_for(&state, move |state, hovered: &bool, _, cx| {
-                if !*hovered {
-                    state.reset_hover(cx);
+            .on_hover(window.listener_for(&state, move |state, hovered, _, cx| {
+                if !hovered {
+                    state.hovered_value = 0;
+                    cx.notify();
                 }
             }))
-            .children((1..=max).map(move |ix| {
-                let state = state.clone();
-                let on_click = on_click.clone();
-                let filled = ix <= value;
-                let hovered = hovered_value >= ix;
+            .map(|mut this| {
+                for ix in 1..=max {
+                    let filled = ix <= value;
+                    let hovered = state.read(cx).hovered_value >= ix;
 
-                div()
-                    .id(ix)
-                    .p_0p5()
-                    .flex_none()
-                    .flex_shrink_0()
-                    .when(filled || hovered, |this| this.text_color(active_color))
-                    .child(
-                        Icon::new(if filled {
-                            IconName::StarFill
-                        } else {
-                            IconName::Star
-                        })
-                        .with_size(size),
-                    )
-                    .when(!self.disabled, |this| {
-                        this.on_mouse_move(window.listener_for(
-                            &state,
-                            move |state, _: &MouseMoveEvent, _, cx| {
-                                state.set_hovered_value(ix, cx);
-                            },
-                        ))
-                        .on_click(window.listener_for(
-                            &state,
-                            move |state, _: &ClickEvent, window, cx| {
-                                let new = if state.value >= ix {
-                                    ix.saturating_sub(1)
+                    this = this.child(
+                        div()
+                            .id(ix)
+                            .p_0p5()
+                            .flex_none()
+                            .flex_shrink_0()
+                            .when(filled || hovered, |this| this.text_color(active_color))
+                            .child(
+                                Icon::new(if filled {
+                                    IconName::StarFill
                                 } else {
-                                    ix
-                                };
-                                state.set_value(new, cx);
-                                if let Some(ref on_click) = on_click {
-                                    on_click(&new, window, cx);
-                                }
-                            },
-                        ))
-                    })
-            }))
-            .when(show_value, |this| {
-                this.child(
-                    div()
-                        .ml_1()
-                        .text_sm()
-                        .text_color(cx.theme().muted_foreground)
-                        .child(format!("{}/{}", value, max)),
-                )
+                                    IconName::Star
+                                })
+                                .with_size(size),
+                            )
+                            .when(!disabled, |this| {
+                                this.on_mouse_move(window.listener_for(
+                                    &state,
+                                    move |state, _, _, cx| {
+                                        state.hovered_value = ix;
+                                        cx.notify();
+                                    },
+                                ))
+                                .on_click({
+                                    let state = state.clone();
+                                    let on_click = on_click.clone();
+                                    move |_: &ClickEvent, window, cx| {
+                                        let new = if value >= ix {
+                                            ix.saturating_sub(1)
+                                        } else {
+                                            ix
+                                        };
+
+                                        state.update(cx, |state, cx| {
+                                            state.value = new;
+                                            cx.notify();
+                                        });
+
+                                        if let Some(on_click) = &on_click {
+                                            on_click(&new, window, cx);
+                                        }
+                                    }
+                                })
+                            }),
+                    );
+                }
+
+                this
             })
     }
 }

@@ -17,7 +17,7 @@ doctest = false
 [features]
 default = ["code-editor"]
 decimal = ["dep:rust_decimal"]
-inspector = ["gpui_macros/inspector", "gpui/inspector", "code-editor"]
+inspector = ["gpui_macros/inspector", "gpui/inspector"]
 tree-sitter = ["dep:tree-sitter", "dep:tree-sitter-json"]
 time = ["dep:chrono"]
 
