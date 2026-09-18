@@ -519,6 +519,7 @@ impl StoryState {
             "AccordionStory" => story!(AccordionStory),
             "SidebarStory" => story!(SidebarStory),
             "FormStory" => story!(FormStory),
+            "SheetStory" => story!(SheetStory),
             "NotificationStory" => story!(NotificationStory),
             "ThemeColorsStory" => story!(ThemeColorsStory),
             _ => {
@@ -563,10 +564,6 @@ impl Panel for StoryContainer {
             .contains(&self.name)
     }
 
-    fn set_zoomed(&mut self, zoomed: bool, _window: &mut Window, _cx: &mut Context<Self>) {
-        println!("panel: {} zoomed: {}", self.name, zoomed);
-    }
-
     fn set_active(&mut self, active: bool, _window: &mut Window, cx: &mut Context<Self>) {
         println!("panel: {} active: {}", self.name, active);
         if let Some(on_active) = self.on_active {
@@ -574,6 +571,10 @@ impl Panel for StoryContainer {
                 on_active(story, active, _window, cx);
             }
         }
+    }
+
+    fn set_zoomed(&mut self, zoomed: bool, _window: &mut Window, _cx: &mut Context<Self>) {
+        println!("panel: {} zoomed: {}", self.name, zoomed);
     }
 
     fn dropdown_menu(

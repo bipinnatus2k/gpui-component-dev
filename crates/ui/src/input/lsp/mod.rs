@@ -12,11 +12,17 @@ mod document_colors;
 mod hover;
 mod semantic_tokens;
 
+#[cfg(feature = "code-editor")]
 pub use code_actions::*;
+#[cfg(feature = "code-editor")]
 pub use completions::*;
+#[cfg(feature = "code-editor")]
 pub use definitions::*;
+#[cfg(feature = "code-editor")]
 pub use document_colors::*;
+#[cfg(feature = "code-editor")]
 pub use hover::*;
+#[cfg(feature = "code-editor")]
 pub use semantic_tokens::*;
 
 /// Host hook to show a document when following an LSP location
@@ -34,6 +40,7 @@ pub type ShowDocumentHandler =
 /// LSP ServerCapabilities
 ///
 /// https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#serverCapabilities
+#[cfg(feature = "code-editor")]
 pub struct Lsp {
     /// The completion provider.
     pub completion_provider: Option<Rc<dyn CompletionProvider>>,
@@ -63,6 +70,7 @@ pub struct Lsp {
     _semantic_tokens_task: Task<()>,
 }
 
+#[cfg(feature = "code-editor")]
 impl Default for Lsp {
     fn default() -> Self {
         Self {
@@ -82,6 +90,7 @@ impl Default for Lsp {
     }
 }
 
+#[cfg(feature = "code-editor")]
 impl Lsp {
     /// Update the LSP when the text changes.
     pub(crate) fn update(
@@ -122,6 +131,7 @@ impl InputState {
     /// Handles an action for the completion menu, if it exists.
     ///
     /// Return true if the action was handled, otherwise false.
+    #[cfg(feature = "code-editor")]
     pub fn handle_action_for_context_menu(
         &mut self,
         action: Box<dyn gpui::Action>,
@@ -151,6 +161,7 @@ impl InputState {
     }
 
     /// Apply a list of [`lsp_types::TextEdit`] to mutate the text.
+    #[cfg(feature = "code-editor")]
     pub fn apply_lsp_edits(
         &mut self,
         text_edits: &Vec<lsp_types::TextEdit>,
@@ -166,6 +177,7 @@ impl InputState {
         }
     }
 
+    #[cfg(feature = "code-editor")]
     pub(super) fn handle_mouse_move(
         &mut self,
         offset: usize,
@@ -190,6 +202,7 @@ impl InputState {
         }
     }
 
+    #[cfg(feature = "code-editor")]
     pub(crate) fn clear_hover_state(&mut self, cx: &mut Context<InputState>) {
         let had_definition = !self.hover_definition.is_empty();
         let had_popover = self.hover_popover.is_some();

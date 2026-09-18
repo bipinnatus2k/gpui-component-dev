@@ -11,7 +11,6 @@ use gpui_component::{
     ActiveTheme as _, Icon, IconName, IndexPath, Placement, WindowExt,
     button::{Button, ButtonVariant, ButtonVariants as _},
     checkbox::Checkbox,
-    date_picker::{DatePicker, DatePickerState},
     h_flex,
     input::{Input, InputState},
     list::{List, ListDelegate, ListItem, ListState},
@@ -148,7 +147,6 @@ pub struct SheetStory {
     list: Entity<ListState<ListItemDeletegate>>,
     input1: Entity<InputState>,
     input2: Entity<InputState>,
-    date: Entity<DatePickerState>,
     overlay: bool,
     overlay_closable: bool,
 }
@@ -241,6 +239,8 @@ impl SheetStory {
         let input2 = cx.new(|cx| {
             InputState::new(window, cx).placeholder("For test focus back on dialog close.")
         });
+
+        #[cfg(feature = "time")]
         let date = cx.new(|cx| DatePickerState::new(window, cx));
 
         Self {
@@ -250,6 +250,7 @@ impl SheetStory {
             list,
             input1,
             input2,
+            #[cfg(feature = "time")]
             date,
             overlay: true,
             overlay_closable: true,
@@ -267,6 +268,7 @@ impl SheetStory {
         let overlay = self.overlay;
         let overlay_closable = self.overlay_closable;
         let input1 = self.input1.clone();
+        #[cfg(feature = "time")]
         let date = self.date.clone();
         window.open_sheet_at(placement, cx, move |this, _, cx| {
             this.overlay(overlay)
@@ -278,7 +280,7 @@ impl SheetStory {
                         .size_full()
                         .gap_3()
                         .child(Input::new(&input1))
-                        .child(DatePicker::new(&date).placeholder("Date of Birth"))
+                        // .child(DatePicker::new(&date).placeholder("Date of Birth"))
                         .child(
                             Button::new("send-notification").child("Test Notification").on_click(
                                 |_, window, cx| {

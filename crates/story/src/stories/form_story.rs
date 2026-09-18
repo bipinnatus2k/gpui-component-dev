@@ -237,13 +237,18 @@ impl Render for FormStory {
                             .child("This is a full width form field."),
                     )
                     .child(
-                        #[cfg(feature = "time")]
-                        field()
-                            .label("Please select your birthday")
-                            .description("Select your birthday, we will send you a gift.")
-                            .child(DatePicker::new(&self.date)),
-                        #[cfg(not(feature = "time"))]
-                        div()
+                        #[cfg(feature = "time")] 
+                        {
+                            field()
+                                .label("Please select your birthday")
+                                .description("Select your birthday, we will send you a gift.")
+                                .child(DatePicker::new(&self.date))
+                        },
+                        #[cfg(not(feature = "time"))] 
+                        {
+                            field()
+                        }
+                        
                     )
                     .child(
                         field()

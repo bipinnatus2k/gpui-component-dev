@@ -130,7 +130,6 @@ pub fn init(cx: &mut App) {
     popover::init(cx);
     menu::init(cx);
     table::init(cx);
-    rating::init(cx);
     text::init(cx);
     tree::init(cx);
     tooltip::init(cx);

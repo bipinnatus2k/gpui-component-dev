@@ -88,7 +88,7 @@ impl Deref for WebView {
 }
 
 impl Focusable for WebView {
-    fn focus_handle(&self, _cx: &gpui::App) -> FocusHandle {
+    fn focus_handle(&self, _cx: &App) -> FocusHandle {
         self.focus_handle.clone()
     }
 }
@@ -98,7 +98,7 @@ impl EventEmitter<DismissEvent> for WebView {}
 impl Render for WebView {
     fn render(
         &mut self,
-        window: &mut gpui::Window,
+        window: &mut Window,
         cx: &mut gpui::Context<Self>,
     ) -> impl IntoElement {
         let view = cx.entity().clone();

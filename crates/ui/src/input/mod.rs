@@ -8,7 +8,7 @@ mod content_type;
 mod cursor;
 mod decorations;
 mod display_map;
-mod editor_stub;
+mod position;
 mod element;
 mod indent;
 mod input;
@@ -41,12 +41,14 @@ pub use indent::TabSize;
 pub use input::*;
 #[cfg(feature = "code-editor")]
 pub(crate) use popovers::{ContextMenu, DiagnosticPopover, HoverPopover};
-#[cfg(not(feature = "code-editor"))]
-pub(crate) use editor_stub::{ContextMenu, DiagnosticPopover, HoverPopover, Lsp, HoverDefinition, InlineCompletion};
+// #[cfg(not(feature = "code-editor"))]
+// pub(crate) use editor_stub::{ContextMenu, DiagnosticPopover, HoverPopover, Lsp, HoverDefinition, InlineCompletion};
 #[cfg(feature = "code-editor")]
 pub use lsp::*;
 #[cfg(feature = "code-editor")]
 pub use lsp_types::Position;
+#[cfg(not(feature = "code-editor"))]
+pub use position::Position;
 pub use mask_pattern::MaskPattern;
 pub use number_input::{NumberInput, NumberInputEvent, NumberStep, StepAction};
 pub use otp_input::*;

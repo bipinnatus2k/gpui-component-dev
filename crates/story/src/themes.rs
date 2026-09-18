@@ -1,7 +1,5 @@
-use std::rc::Rc;
-
 use gpui::{Action, App, SharedString};
-use gpui_component::{Theme, ThemeConfig, ThemeMode, ThemeRegistry, scroll::ScrollbarShow};
+use gpui_component::{Theme, ThemeMode, ThemeRegistry, scroll::ScrollbarShow};
 use serde::{Deserialize, Serialize};
 
 #[cfg(not(target_family = "wasm"))]
@@ -105,37 +103,3 @@ pub(crate) struct SwitchTheme(pub(crate) SharedString);
 #[derive(Action, Clone, PartialEq)]
 #[action(namespace = themes, no_json)]
 pub(crate) struct SwitchThemeMode(pub(crate) ThemeMode);
-
-/// Apply the Midnight Purple dark theme programmatically via `ThemeConfig` JSON.
-///
-/// Uses `Theme::global_mut(cx).apply_config()` pattern to set:
-/// - Primary: `#7C3AED`
-/// - Background: `#0F0A1E`
-/// - Foreground: `#EDE9FE`
-/// - Border radius: `8px`
-pub fn apply_midnight_purple_theme(cx: &mut App) {
-    let config = serde_json::from_value::<ThemeConfig>(serde_json::json!({
-        "name": "Midnight Purple",
-        "mode": "dark",
-        "radius": 8,
-        "colors": {
-            "background": "#0F0A1E",
-            "foreground": "#EDE9FE",
-            "primary.background": "#7C3AED",
-            "primary.foreground": "#FFFFFF",
-            "primary.hover.background": "#6D28D9",
-            "primary.active.background": "#5B21B6",
-            "secondary.background": "#1E103A",
-            "secondary.foreground": "#C4B5FD",
-            "muted.background": "#1A0F2E",
-            "muted.foreground": "#A78BFA",
-            "border": "#2D1B69",
-            "input.border": "#3B1F8E",
-            "ring": "#7C3AED",
-        }
-    }))
-    .expect("Failed to parse Midnight Purple theme config");
-
-    Theme::global_mut(cx).apply_config(&Rc::new(config));
-    cx.refresh_windows();
-}

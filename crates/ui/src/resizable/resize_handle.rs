@@ -1,10 +1,6 @@
 use std::{cell::Cell, rc::Rc};
 
-use gpui::{
-    div, prelude::FluentBuilder as _, px, AnyElement, App, Axis, Element, ElementId, Entity,
-    GlobalElementId, InteractiveElement, IntoElement, MouseDownEvent, MouseUpEvent,
-    ParentElement as _, Pixels, Point, Render, StatefulInteractiveElement, Styled as _, Window,
-};
+use gpui::{div, prelude::FluentBuilder as _, px, AnyElement, App, Axis, Element, ElementId, Entity, GlobalElementId, InteractiveElement, IntoElement, MouseDownEvent, MouseUpEvent, ParentElement as _, Pixels, Point, Render, StatefulInteractiveElement, Styled as _, Window, DragMoveEvent, Context};
 
 use crate::{dock::DockPlacement, ActiveTheme as _, AxisExt as _};
 
@@ -28,7 +24,7 @@ pub(crate) struct ResizeHandle<T: 'static, E: 'static + Render> {
 }
 
 impl<T: 'static, E: 'static + Render> ResizeHandle<T, E> {
-    fn new(id: impl Into<ElementId>, axis: Axis) -> Self {
+    pub(crate) fn new(id: impl Into<ElementId>, axis: Axis) -> Self {
         let id = id.into();
         Self {
             id: id.clone(),

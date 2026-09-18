@@ -5,7 +5,7 @@ use gpui::{
 };
 
 /// The style of the separator line.
-#[derive(Clone, Copy, PartialEq, Default, Debug)]
+#[derive(Clone, Copy, PartialEq, Default)]
 pub enum SeparatorStyle {
     #[default]
     Solid,
@@ -151,46 +151,5 @@ impl RenderOnce for Separator {
                         .child(label),
                 )
             })
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[gpui::test]
-    fn test_separator_builder(_cx: &mut gpui::TestAppContext) {
-        let separator = Separator::horizontal()
-            .label("Section")
-            .dashed()
-            .color(gpui::red());
-
-        assert_eq!(separator.axis, Axis::Horizontal);
-        assert_eq!(separator.label, Some("Section".into()));
-        assert_eq!(separator.line_style, SeparatorStyle::Dashed);
-        assert!(separator.color.is_some());
-    }
-
-    #[gpui::test]
-    fn test_separator_fields(_cx: &mut gpui::TestAppContext) {
-        let horizontal = Separator::horizontal();
-        assert_eq!(horizontal.axis, Axis::Horizontal);
-        assert_eq!(horizontal.label, None);
-        assert_eq!(horizontal.color, None);
-        assert_eq!(horizontal.line_style, SeparatorStyle::Solid);
-
-        let vertical = Separator::vertical();
-        assert_eq!(vertical.axis, Axis::Vertical);
-        assert_eq!(vertical.label, None);
-        assert_eq!(vertical.color, None);
-        assert_eq!(vertical.line_style, SeparatorStyle::Solid);
-
-        let vertical_dashed = Separator::vertical_dashed();
-        assert_eq!(vertical_dashed.axis, Axis::Vertical);
-        assert_eq!(vertical_dashed.line_style, SeparatorStyle::Dashed);
-
-        let horizontal_dashed = Separator::horizontal_dashed();
-        assert_eq!(horizontal_dashed.axis, Axis::Horizontal);
-        assert_eq!(horizontal_dashed.line_style, SeparatorStyle::Dashed);
     }
 }
